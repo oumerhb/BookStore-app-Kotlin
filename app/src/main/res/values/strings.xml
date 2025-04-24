@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Online book store app</string>
+    <string name="app_logo">eBook Logo</string>
+    <string name="reading_illustration">Person reading a book illustration</string>
+    <string name="facebook_login">Login with Facebook</string>
+    <string name="google_login">Login with Google</string>
+    <string name="back_button">Go back</string>
+</resources>
