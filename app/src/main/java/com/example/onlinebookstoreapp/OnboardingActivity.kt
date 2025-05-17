@@ -16,12 +16,11 @@ class OnboardingActivity : AppCompatActivity() {
 
         // Set click listeners
         loginButton.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
         signUpButton.setOnClickListener {
-            // TODO: Implement sign up navigation
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this, CreateAccountActivity::class.java))
         }
     }
 } 
