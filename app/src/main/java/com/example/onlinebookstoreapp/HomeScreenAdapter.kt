@@ -12,7 +12,8 @@ import com.google.android.material.chip.ChipGroup
 class HomeScreenAdapter(
     private var items: List<HomeScreenItem>,
     private val onFilterClicked: (FilterOption) -> Unit,
-    private val onSeeAllClicked: (String) -> Unit // Category title
+    private val onSeeAllClicked: (String) -> Unit,
+    private val onBookClicked: (Book) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -45,7 +46,7 @@ class HomeScreenAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val currentItem = items[position]) {
-            is HomeScreenItem.CategoryRow -> (holder as CategoryViewHolder).bind(currentItem.category)
+            is HomeScreenItem.CategoryRow -> (holder as CategoryViewHolder).bind(currentItem.category,onBookClicked)
             is HomeScreenItem.FilterRow -> (holder as FilterViewHolder).bind(currentItem)
         }
     }
@@ -64,11 +65,11 @@ class HomeScreenAdapter(
         private val seeAllTextView: TextView = itemView.findViewById(R.id.tv_see_all)
         private val booksRecyclerView: RecyclerView = itemView.findViewById(R.id.rv_horizontal_books)
 
-        fun bind(category: Category) {
+        fun bind(category: Category,onItemClicked: (Book) -> Unit) {
             categoryTitleTextView.text = category.title
             booksRecyclerView.apply {
                 layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
-                adapter = BookAdapter(category.books)
+                adapter = BookAdapter(category.books,onItemClicked)
                 // For performance, if item sizes are fixed:
                 // setHasFixedSize(true)
             }

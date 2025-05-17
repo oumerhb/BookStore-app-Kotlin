@@ -9,7 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 // import com.bumptech.glide.Glide // If using Glide for image loading
 
-class BookAdapter(private val books: List<Book>) :
+class BookAdapter(
+    private val books: List<Book>,
+    private val onItemClicked: (Book) -> Unit
+) :
     RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
@@ -19,7 +22,10 @@ class BookAdapter(private val books: List<Book>) :
     }
 
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
-        holder.bind(books[position])
+        val book = books[position]
+        holder.bind(book)
+        holder.itemView.setOnClickListener {
+            onItemClicked(book)}
     }
 
     override fun getItemCount(): Int = books.size

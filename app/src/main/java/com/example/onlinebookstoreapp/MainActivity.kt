@@ -1,6 +1,7 @@
 package com.example.onlinebookstoreapp
 
 // MainActivity.kt (or your Fragment)
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -46,17 +47,23 @@ class MainActivity : AppCompatActivity() {
             emptyList(),
             onFilterClicked = { filterOption ->
                 Toast.makeText(this, "Filter: ${filterOption.text}", Toast.LENGTH_SHORT).show()
-                // Handle filter selection logic (e.g., update list, API call)
             },
             onSeeAllClicked = { categoryTitle ->
                 Toast.makeText(this, "See all: $categoryTitle", Toast.LENGTH_SHORT).show()
-                // Navigate to a screen showing all books in that category
+            },
+            onBookClicked = { book -> // This is the callback from HomeScreenAdapter
+                val intent = Intent(this, BookDetailsActivity::class.java)
+                intent.putExtra(BookDetailsActivity.EXTRA_BOOK_ID, book.id)
+                // If your Book class is Parcelable, you can pass the whole object:
+                // intent.putExtra(BookDetailsActivity.EXTRA_BOOK_OBJECT, book)
+                startActivity(intent)
             }
         )
         mainRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = homeScreenAdapter
         }
+        loadData()
     }
 
     private fun loadData() {

@@ -7,4 +7,17 @@
     <string name="back_button">Go back</string>
     <string name="profile">Profile</string>
     <string name="search_books">Search books...</string>
+    <string name="add_to_wishlist">Add to wishlist</string>
+    <string name="decrease_quantity">Decrease quantity</string>
+    <string name="add_to_cart">Add to cart</string>
+    <string name="buy_now">Buy Now</string>
+    <string name="search">Search</string>
+    <string name="cart">Cart</string>
+    <string name="similar_books">Similar books</string>
+    <string name="reviews">Reviews</string>
+    <string name="book_description">Book description</string>
+    <string name="book_cover">Book Cover</string>
+    <string name="increase_quantity">Increase quantity</string>
+    <string name="click_to_expand">Click to expand</string>
+    <string name="book_details">Book details</string>
 </resources>
