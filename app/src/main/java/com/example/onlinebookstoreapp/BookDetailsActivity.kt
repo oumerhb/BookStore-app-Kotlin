@@ -46,7 +46,17 @@ class BookDetailsActivity : AppCompatActivity() {
     private lateinit var tvDescContent: TextView
     private var isDescExpanded = false
 
-    // ... (similar for details and reviews sections)
+    // For Book Details
+    private lateinit var llDetailsHeader: LinearLayout
+    private lateinit var ivExpandDetails: ImageView
+    private lateinit var tvDetailsContent: TextView
+    private var isDetailsExpanded = false
+
+    // For Reviews
+    private lateinit var llReviewsHeader: LinearLayout
+    private lateinit var ivExpandReviews: ImageView
+    private lateinit var tvReviewsContent: TextView
+    private var isReviewsExpanded = false
 
     private lateinit var rvSimilarBooks: RecyclerView
     private lateinit var similarBooksAdapter: BookAdapter // Reuse your BookAdapter
@@ -76,11 +86,16 @@ class BookDetailsActivity : AppCompatActivity() {
         llDescHeader = findViewById(R.id.ll_book_description_header)
         ivExpandDesc = findViewById(R.id.iv_expand_description)
         tvDescContent = findViewById(R.id.tv_book_description_content)
+        llDetailsHeader = findViewById(R.id.ll_book_details_header)
+        ivExpandDetails = findViewById(R.id.iv_expand_details)
+        tvDetailsContent = findViewById(R.id.tv_book_details_content)
+        llReviewsHeader = findViewById(R.id.ll_reviews_header)
+        ivExpandReviews = findViewById(R.id.iv_expand_reviews)
+        tvReviewsContent = findViewById(R.id.tv_reviews_content)
 
         rvSimilarBooks = findViewById(R.id.rv_similar_books)
 
         val bookId = intent.getStringExtra(EXTRA_BOOK_ID)
-        // val bookFromIntent = intent.getParcelableExtra<Book>(EXTRA_BOOK_OBJECT)
 
         if (bookId != null) {
             loadBookDetails(bookId)
@@ -123,7 +138,7 @@ class BookDetailsActivity : AppCompatActivity() {
 
 
             // Populate description, details, reviews (dummy data for now)
-            tvDescContent.text = "This is a fascinating book about ${book.title.toLowerCase()} by ${book.author}. It explores many interesting concepts and is a must-read for enthusiasts."
+            tvDescContent.text = "This is a fascinating book about ${book.title.lowercase()} by ${book.author}. It explores many interesting concepts and is a must-read for enthusiasts."
             // ... and so on for other sections
         }
     }
@@ -173,7 +188,54 @@ class BookDetailsActivity : AppCompatActivity() {
             tvDescContent.visibility = if (isDescExpanded) View.VISIBLE else View.GONE
             ivExpandDesc.setImageResource(if (isDescExpanded) R.drawable.ic_expand_less else R.drawable.ic_expand_more)
         }
-        // ... (Add similar listeners for "Book Details" and "Reviews" headers)
+
+        llDetailsHeader.setOnClickListener {
+            isDetailsExpanded = !isDetailsExpanded
+            tvDetailsContent.visibility = if (isDetailsExpanded) View.VISIBLE else View.GONE
+            ivExpandDetails.setImageResource(
+                if (isDetailsExpanded) R.drawable.ic_expand_less else R.drawable.ic_expand_more
+            )
+            // Optionally, load detailed content here if it's heavy and not needed initially
+            if (isDetailsExpanded && tvDetailsContent.text.isBlank()) {
+                // Example: currentBook?.let { tvDetailsContent.text = "ISBN: ${it.isbn}\nPages: ${it.pages}" }
+                // For now, using the dummy text from XML if it's not already set
+                if (tvDetailsContent.text.toString().contains("ISBN")) { // Check if placeholder is already there
+                    // Do nothing if already populated (e.g. from loadBookDetails or XML tools:text)
+                } else {
+                    // Populate if empty
+                    currentBook?.let { book ->
+                        // You'd have these fields in your Book data class
+                        // For now, let's use some placeholders
+                        val detailsText = "ISBN: ${book.id}-XYZ\nPages: 250\nPublisher: Demo Publisher\nLanguage: English"
+                        tvDetailsContent.text = detailsText
+                    } ?: run {
+                        tvDetailsContent.text = "Details not available."
+                    }
+                }
+            }
+        }
+
+        // Reviews
+        llReviewsHeader.setOnClickListener {
+            isReviewsExpanded = !isReviewsExpanded
+            tvReviewsContent.visibility = if (isReviewsExpanded) View.VISIBLE else View.GONE
+            ivExpandReviews.setImageResource(
+                if (isReviewsExpanded) R.drawable.ic_expand_less else R.drawable.ic_expand_more
+            )
+            // Optionally, load reviews here (e.g., from an API or a more complex local data source)
+            if (isReviewsExpanded && tvReviewsContent.text.toString().contains("No reviews yet")) { // Or check if it's empty
+                // tvReviewsContent.text = "Loading reviews..."
+                // fetchReviewsForBook(currentBook?.id)
+                // For now, we'll just show the placeholder or a dummy "loaded" state
+                tvReviewsContent.text = "Review 1: Great book!\nReview 2: Very insightful."
+            }
+            else if (!isReviewsExpanded && !tvReviewsContent.text.toString().contains("No reviews yet")) {
+                // Optional: clear complex loaded content if you want to reload next time, or leave as is
+                // For this example, we will let it persist once loaded.
+                // If you want to revert to placeholder when collapsed:
+              tvReviewsContent.text = "No reviews yet. Be the first to review!"
+            }
+        }
 
     }
 
