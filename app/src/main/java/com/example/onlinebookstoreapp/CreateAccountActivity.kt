@@ -53,7 +53,7 @@ class CreateAccountActivity : AppCompatActivity() {
         }
 
         backButton.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         signInText.setOnClickListener {

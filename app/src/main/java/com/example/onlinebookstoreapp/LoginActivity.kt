@@ -25,7 +25,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Set click listeners
         backButton.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         loginButton.setOnClickListener {

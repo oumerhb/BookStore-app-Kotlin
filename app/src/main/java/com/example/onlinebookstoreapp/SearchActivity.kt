@@ -38,7 +38,7 @@ class SearchActivity : AppCompatActivity() {
 
         // Set click listeners
         backButton.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         voiceSearchButton.setOnClickListener {
