@@ -1,5 +1,5 @@
 package com.example.onlinebookstoreapp
-// BookDetailsActivity.kt
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -15,13 +15,14 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-// import com.bumptech.glide.Glide // If using Glide
+import com.google.android.material.navigation.NavigationView
+
+
 
 class BookDetailsActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_BOOK_ID = "extra_book_id"
-        // const val EXTRA_BOOK_OBJECT = "extra_book_object" // If passing Parcelable
     }
 
     private var currentBook: Book? = null // To hold the loaded book details
@@ -64,9 +65,20 @@ class BookDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_book_details)
-
-        val toolbar: Toolbar = findViewById(R.id.toolbar_book_details)
+        val drawerLayout=findViewById<androidx.drawerlayout.widget.DrawerLayout>(R.id.drawerLayout)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+        toolbar.setNavigationOnClickListener {
+            drawerLayout.open()
+        }
+
+        val navigationView = findViewById<NavigationView>(R.id.navigationView)
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            // Handle menu item selected
+            menuItem.isChecked = true
+            drawerLayout.close()
+            true
+        }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false) // No title, using icons
 
@@ -209,7 +221,7 @@ class BookDetailsActivity : AppCompatActivity() {
                         val detailsText = "ISBN: ${book.id}-XYZ\nPages: 250\nPublisher: Demo Publisher\nLanguage: English"
                         tvDetailsContent.text = detailsText
                     } ?: run {
-                        tvDetailsContent.text = "Details not available."
+                        tvDetailsContent.text = getString(R.string.details_not_available)
                     }
                 }
             }
@@ -227,7 +239,7 @@ class BookDetailsActivity : AppCompatActivity() {
                 // tvReviewsContent.text = "Loading reviews..."
                 // fetchReviewsForBook(currentBook?.id)
                 // For now, we'll just show the placeholder or a dummy "loaded" state
-                tvReviewsContent.text = "Review 1: Great book!\nReview 2: Very insightful."
+                tvReviewsContent.text = getString(R.string.sample_reviews)
             }
             else if (!isReviewsExpanded && !tvReviewsContent.text.toString().contains("No reviews yet")) {
                 // Optional: clear complex loaded content if you want to reload next time, or leave as is
@@ -252,7 +264,6 @@ class BookDetailsActivity : AppCompatActivity() {
             ibWishlist.clearColorFilter() // Or set to default tint
         }
     }
-    // Add to colors.xml: <color name="wishlist_red_color">#E53935</color>
 
 
     private fun loadSimilarBooks(currentBookId: String) {

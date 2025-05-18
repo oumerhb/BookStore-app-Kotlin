@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.drawerlayout.widget.DrawerLayout android:id="@+id/drawerLayoutMain"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,11 +16,11 @@
       android:layout_height="wrap_content">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbarMain"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:title="Bookstore"
-        app:navigationIcon="@drawable/ic_menu" >
+        app:navigationIcon="@drawable/ic_menu">
       <!-- You can embed a SearchView here or add menu items -->
       <ImageView
           android:id="@+id/profile_icon"
@@ -59,3 +63,10 @@
       app:menu="@menu/bottom_nav_menu" /> <!-- Create bottom_nav_menu.xml -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+  <com.google.android.material.navigation.NavigationView
+      android:id="@+id/nav_main"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_gravity="start"
+      app:menu="@menu/navigation_drawer"/>
+</androidx.drawerlayout.widget.DrawerLayout>

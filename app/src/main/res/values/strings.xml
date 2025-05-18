@@ -20,4 +20,6 @@
     <string name="increase_quantity">Increase quantity</string>
     <string name="click_to_expand">Click to expand</string>
     <string name="book_details">Book details</string>
+    <string name="details_not_available">Details not available.</string>
+    <string name="sample_reviews">Review 1: Great book!\nReview 2: Very insightful.</string>
 </resources>

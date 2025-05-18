@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,11 +20,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val toolbar: com.google.android.material.appbar.MaterialToolbar = findViewById(R.id.toolbar)
+        val drawerLayout=findViewById<androidx.drawerlayout.widget.DrawerLayout>(R.id.drawerLayoutMain)
+        val toolbar: Toolbar = findViewById(R.id.toolbarMain)
         setSupportActionBar(toolbar)
-        // For hamburger menu action if you have a NavDrawer
-        // supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        // supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_menu)
+        toolbar.setNavigationOnClickListener {
+            drawerLayout.open()
+        }
+
+        val navigationView = findViewById<NavigationView>(R.id.nav_main)
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            // Handle menu item selected
+            menuItem.isChecked = true
+            drawerLayout.close()
+            true
+        }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(true)
 
 
         mainRecyclerView = findViewById(R.id.rv_main_content)
