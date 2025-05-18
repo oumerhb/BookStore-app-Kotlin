@@ -15,12 +15,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainRecyclerView: RecyclerView
     private lateinit var homeScreenAdapter: HomeScreenAdapter
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val drawerLayout=findViewById<androidx.drawerlayout.widget.DrawerLayout>(R.id.drawerLayoutMain)
+        val drawerLayout =
+            findViewById<androidx.drawerlayout.widget.DrawerLayout>(R.id.drawerLayoutMain)
         val toolbar: Toolbar = findViewById(R.id.toolbarMain)
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener {
@@ -40,35 +40,42 @@ class MainActivity : AppCompatActivity() {
 
         mainRecyclerView = findViewById(R.id.rv_main_content)
         setupRecyclerView()
-        loadData()
+
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    Toast.makeText(this, "Home clicked", Toast.LENGTH_SHORT).show()
+                    loadHomeData()
                     true
                 }
-                // Handle other items
+
+                R.id.nav_library -> {
+                    loadLibraryData()
+                    true
+                }
+
                 else -> false
             }
         }
+        if (savedInstanceState == null) {
+            bottomNav.selectedItemId = R.id.nav_home // Select home by default
+        }
     }
-
     private fun setupRecyclerView() {
         homeScreenAdapter = HomeScreenAdapter(
             emptyList(),
             onFilterClicked = { filterOption ->
                 Toast.makeText(this, "Filter: ${filterOption.text}", Toast.LENGTH_SHORT).show()
+                // Implement filter logic if needed
             },
             onSeeAllClicked = { categoryTitle ->
                 Toast.makeText(this, "See all: $categoryTitle", Toast.LENGTH_SHORT).show()
+                // Navigate to a screen showing all books in that category
             },
-            onBookClicked = { book -> // This is the callback from HomeScreenAdapter
+            onBookClicked = { book ->
                 val intent = Intent(this, BookDetailsActivity::class.java)
                 intent.putExtra(BookDetailsActivity.EXTRA_BOOK_ID, book.id)
-                // If your Book class is Parcelable, you can pass the whole object:
-                // intent.putExtra(BookDetailsActivity.EXTRA_BOOK_OBJECT, book)
                 startActivity(intent)
             }
         )
@@ -76,10 +83,10 @@ class MainActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = homeScreenAdapter
         }
-        loadData()
+        // loadHomeData() // Load initial data after adapter is set
     }
 
-    private fun loadData() {
+    private fun loadHomeData() {
         // Sample Data
         val recentlyReadBooks = listOf(
             Book("1", "The Midnight Library", "Matt Haig", price = "$10.99"),
@@ -113,5 +120,38 @@ class MainActivity : AppCompatActivity() {
         // Add more sections as needed
 
         homeScreenAdapter.updateData(homeScreenItems)
+    }
+    private fun loadLibraryData() {
+        supportActionBar?.title = "My Library"
+
+        // Sample data for library - in a real app, these would be user's purchased/saved books
+        val libraryBooks = listOf(
+            Book("dm", "Don't Make Me Think", "Steve Krug", category = "Web design", imageUrl = "dont_make_me_think_cover"),
+            Book("dj", "Design is a Job", "Mike Monteiro", category = "Web design", imageUrl = "design_is_a_job_cover"),
+            Book("dw", "Designing with Web Standards", "Jeffrey Zeldman", category = "Web design", imageUrl = "designing_with_web_standards_cover"),
+            Book("s1", "JavaScript and JQuery", "Jon Duckett", category = "Web design", imageUrl = "js_jquery_cover"),
+            Book("s2", "Responsive Web Design", "Ethan Marcotte", category = "Web design", imageUrl = "responsive_web_cover"),
+            Book("s3", "Neuro Web Design", "Susan Weinschenk", category = "Web design", imageUrl = "neuro_web_cover"),
+            Book("1", "The Midnight Library", "Matt Haig", category = "Romance", imageUrl = "placeholder_image_simple_x"),
+            Book("2", "Klara and the Sun", "Kazuo Ishiguro", category = "Science", imageUrl = "placeholder_image_simple_x"),
+            Book("4", "Atomic Habits", "James Clear", category = "Design", imageUrl = "placeholder_image_simple_x")
+            // Add more books with different categories
+        )
+
+        val booksByCategory = libraryBooks.groupBy { it.category }
+        val libraryScreenItems = mutableListOf<HomeScreenItem>()
+
+        booksByCategory.forEach { (categoryName, booksInCategory) ->
+            libraryScreenItems.add(HomeScreenItem.CategoryGridRow(Category(categoryName, booksInCategory)))
+        }
+
+        if (libraryScreenItems.isEmpty()) {
+            // You can add a placeholder item for an empty library
+            // e.g., a TextView in a custom layout
+            homeScreenAdapter.updateData(listOf(HomeScreenItem.CategoryGridRow(Category("Your Library is Empty", emptyList()))))
+
+        } else {
+            homeScreenAdapter.updateData(libraryScreenItems)
+        }
     }
 }

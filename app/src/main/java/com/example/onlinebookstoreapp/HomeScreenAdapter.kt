@@ -19,12 +19,14 @@ class HomeScreenAdapter(
     companion object {
         private const val TYPE_CATEGORY = 0
         private const val TYPE_FILTER = 1
+        private const val TYPE_CATEGORY_GRID = 2
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {
             is HomeScreenItem.CategoryRow -> TYPE_CATEGORY
             is HomeScreenItem.FilterRow -> TYPE_FILTER
+            is HomeScreenItem.CategoryGridRow -> TYPE_CATEGORY_GRID
         }
     }
 
@@ -33,12 +35,17 @@ class HomeScreenAdapter(
             TYPE_CATEGORY -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_category_row, parent, false)
-                CategoryViewHolder(view)
+                CategoryHorizontalViewHolder(view)
             }
             TYPE_FILTER -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_filter_row, parent, false)
                 FilterViewHolder(view)
+            }
+            TYPE_CATEGORY_GRID -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_category_grid_row, parent, false)
+                CategoryGridViewHolder(view)
             }
             else -> throw IllegalArgumentException("Invalid view type")
         }
@@ -46,8 +53,9 @@ class HomeScreenAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val currentItem = items[position]) {
-            is HomeScreenItem.CategoryRow -> (holder as CategoryViewHolder).bind(currentItem.category,onBookClicked)
+            is HomeScreenItem.CategoryRow -> (holder as CategoryHorizontalViewHolder).bind(currentItem.category,onBookClicked)
             is HomeScreenItem.FilterRow -> (holder as FilterViewHolder).bind(currentItem)
+            is HomeScreenItem.CategoryGridRow -> (holder as CategoryGridViewHolder).bind(currentItem.category, onBookClicked)
         }
     }
 
@@ -60,18 +68,16 @@ class HomeScreenAdapter(
 
     // --- ViewHolders ---
 
-    inner class CategoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class CategoryHorizontalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val categoryTitleTextView: TextView = itemView.findViewById(R.id.tv_category_title)
         private val seeAllTextView: TextView = itemView.findViewById(R.id.tv_see_all)
         private val booksRecyclerView: RecyclerView = itemView.findViewById(R.id.rv_horizontal_books)
 
-        fun bind(category: Category,onItemClicked: (Book) -> Unit) {
+        fun bind(category: Category, onItemClicked: (Book) -> Unit) { // Pass onBookClicked
             categoryTitleTextView.text = category.title
             booksRecyclerView.apply {
                 layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
-                adapter = BookAdapter(category.books,onItemClicked)
-                // For performance, if item sizes are fixed:
-                // setHasFixedSize(true)
+                adapter = BookAdapter(category.books, onItemClicked) // Pass to BookAdapter
             }
             seeAllTextView.setOnClickListener {
                 onSeeAllClicked(category.title)
@@ -105,6 +111,22 @@ class HomeScreenAdapter(
                     onFilterClicked(filterOption)
                 }
                 chipGroup.addView(chip)
+            }
+        }
+    }
+    inner class CategoryGridViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val categoryTitleTextView: TextView = itemView.findViewById(R.id.tv_category_title_grid)
+        private val seeAllTextView: TextView = itemView.findViewById(R.id.tv_see_all_grid)
+        private val booksGridRecyclerView: RecyclerView = itemView.findViewById(R.id.rv_grid_books)
+
+        fun bind(category: Category, onItemClicked: (Book) -> Unit) { // Pass onBookClicked
+            categoryTitleTextView.text = category.title
+            // The GridLayoutManager is already set in XML, but you can also set/modify it here
+            // booksGridRecyclerView.layoutManager = GridLayoutManager(itemView.context, 2) // Example: 2 columns
+            booksGridRecyclerView.adapter = BookAdapter(category.books, onItemClicked) // Pass to BookAdapter
+
+            seeAllTextView.setOnClickListener {
+                onSeeAllClicked(category.title) // Or a different action for library "view all"
             }
         }
     }
