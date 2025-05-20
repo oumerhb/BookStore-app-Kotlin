@@ -110,11 +110,18 @@ class BookDetailsActivity : AppCompatActivity() {
         val bookId = intent.getStringExtra(EXTRA_BOOK_ID)
 
         if (bookId != null) {
-            loadBookDetails(bookId)
-            loadSimilarBooks(bookId) // You'd likely get similar books based on the current book
+            currentBook = BookRepository.getBookById(bookId) // Use BookRepository
+            if (currentBook == null) {
+                Toast.makeText(this, "Book details not found.", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
+            isWishlisted = UserDataRepository.isInWishlist(currentBook!!.id) // Check initial state
+            populateBookDetails(currentBook!!)
+            loadSimilarBooks(currentBook!!.id)
         } else {
-            Toast.makeText(this, "Book not found", Toast.LENGTH_LONG).show()
-            finish() // Close activity if no book ID
+            Toast.makeText(this, "Book ID missing.", Toast.LENGTH_SHORT).show()
+            finish()
             return
         }
 
@@ -122,49 +129,41 @@ class BookDetailsActivity : AppCompatActivity() {
         updateQuantityDisplay()
         updateWishlistIcon()
     }
-
-    private fun loadBookDetails(bookId: String) {
-        // --- In a real app, fetch this from a database or API ---
-        // For now, let's simulate finding it from a predefined list or creating a dummy one
-        currentBook = getDummyBookById(bookId) // Implement this function
-
-        currentBook?.let { book ->
-            tvBookTitle.text = book.title
-            tvBookAuthor.text = book.author
-            tvBookPrice.text = book.price ?: "N/A" // Handle null price
-
-            // Simulate discount
-            if (bookId == "1" || bookId == "4") { // Example: book "1" or "4" has discount
-                tvDiscountBanner.text = "-30%"
-                tvDiscountBanner.visibility = View.VISIBLE
-            } else {
-                tvDiscountBanner.visibility = View.GONE
-            }
-
-            // Load image using Glide or Picasso, or set a placeholder
-            // Glide.with(this).load(book.imageUrl).placeholder(R.drawable.placeholder_book_cover_with_x).into(ivBookCover)
-            ivBookCover.setImageResource(R.drawable.placeholder_book_cover_with_x) // Placeholder
-            if (book.title == "Don't Make Me Think") { // Specific image for demo
-                ivBookCover.setImageResource(R.drawable.placeholder_book_cover_with_x) // You'll need to add this image
-            }
-
-
-            // Populate description, details, reviews (dummy data for now)
-            tvDescContent.text = "This is a fascinating book about ${book.title.lowercase()} by ${book.author}. It explores many interesting concepts and is a must-read for enthusiasts."
-            // ... and so on for other sections
+    fun onDetailsToolbarCartIconClicked(view: View) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            // These flags help bring MainActivity to the front if it exists,
+            // or create a new one, and clear activities on top of it in this task.
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra("NAVIGATE_TO_TAB", "cart") // Send a signal to MainActivity
         }
+        startActivity(intent)
+        finish() // Close BookDetailsActivity as we are navigating away
     }
+    private fun populateBookDetails(book: Book) {
+        tvBookTitle.text = book.title
+        tvBookAuthor.text = book.author
+        tvBookPrice.text = book.price ?: "N/A"
+        ivBookCover.setImageResource(R.drawable.placeholder_book_cover_with_x)
 
-    private fun getDummyBookById(bookId: String): Book? {
-        // This is just a placeholder. In a real app, this would query your data source.
-        val allBooks = listOf(
-            Book("1", "The Midnight Library", "Matt Haig", price = "EGP 250.00", imageUrl = "url1"),
-            Book("2", "Klara and the Sun", "Kazuo Ishiguro", price = "EGP 300.00", imageUrl = "url2"),
-            Book("3", "Project Hail Mary", "Andy Weir", price = "EGP 280.00", imageUrl = "url3"),
-            Book("4", "Atomic Habits", "James Clear", price = "EGP 220.00", imageUrl = "url4"),
-            Book("dm", "Don't Make Me Think", "Steve Krug", price = "EGP 35.46", imageUrl = "url_dmmt") // Special ID for the sample image
-        )
-        return allBooks.find { it.id == bookId } ?: if (bookId == "dm") Book("dm", "Don't Make Me Think", "Steve Krug", price = "EGP 35.46", imageUrl = "url_dmmt") else null
+
+        // Discount banner logic (example)
+        if (book.discountPercent != null && book.discountPercent > 0) {
+            tvDiscountBanner.text = "-${book.discountPercent}%"
+            tvDiscountBanner.visibility = View.VISIBLE
+        } else if (book.price?.contains("Sale", ignoreCase = true) == true) { // Fallback for string based sale
+            tvDiscountBanner.text = "-SPECIAL-" // Or parse from price string
+            tvDiscountBanner.visibility = View.VISIBLE
+        }
+        else {
+            tvDiscountBanner.visibility = View.GONE
+        }
+
+        // Populate description, details (dummy data for now)
+        tvDescContent.text = "This is a fascinating book about ${book.title.lowercase()} by ${book.author}. It explores many interesting concepts and is a must-read for enthusiasts. More details to come regarding its specific content and chapters."
+        tvDetailsContent.text = "ISBN: ${book.id}-XYZ\nPages: (Pages)\nPublisher: (Publisher)\nLanguage: English"
+        tvReviewsContent.text = "No reviews yet. Be the first to review!"
+
+        // ... (other UI updates based on book data)
     }
 
 
@@ -180,14 +179,26 @@ class BookDetailsActivity : AppCompatActivity() {
             updateQuantityDisplay()
         }
         ibWishlist.setOnClickListener {
-            isWishlisted = !isWishlisted
-            updateWishlistIcon()
-            val message = if (isWishlisted) "Added to wishlist" else "Removed from wishlist"
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            currentBook?.let { book ->
+                if (UserDataRepository.isInWishlist(book.id)) {
+                    UserDataRepository.removeFromWishlist(book.id)
+                    isWishlisted = false
+                    Toast.makeText(this, "${book.title} removed from wishlist", Toast.LENGTH_SHORT).show()
+                } else {
+                    UserDataRepository.addToWishlist(book.id)
+                    isWishlisted = true
+                    Toast.makeText(this, "${book.title} added to wishlist", Toast.LENGTH_SHORT).show()
+                }
+                updateWishlistIcon()
+            }
         }
+
         btnAddToCart.setOnClickListener {
-            Toast.makeText(this, "${currentBook?.title} x$quantity added to cart", Toast.LENGTH_SHORT).show()
-            // Add to cart logic here
+            currentBook?.let { book ->
+                UserDataRepository.addToCart(book.id, quantity)
+                Toast.makeText(this, "${book.title} (x$quantity) added to cart", Toast.LENGTH_SHORT).show()
+                updateToolbarCartBadge() // Update badge after adding to cart
+            }
         }
         btnBuyNow.setOnClickListener {
             Toast.makeText(this, "Proceeding to checkout for ${currentBook?.title} x$quantity", Toast.LENGTH_SHORT).show()
@@ -250,6 +261,25 @@ class BookDetailsActivity : AppCompatActivity() {
         }
 
     }
+    private fun updateToolbarCartBadge() {
+        // Assuming tv_cart_badge_toolbar is the ID in activity_book_details.xml toolbar
+        val cartBadge = findViewById<TextView>(R.id.tv_cart_badge_toolbar)
+        val itemCount = UserDataRepository.getCartItemCount()
+        if (itemCount > 0) {
+            cartBadge.text = itemCount.toString()
+            cartBadge.visibility = View.VISIBLE
+        } else {
+            cartBadge.visibility = View.GONE
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        updateToolbarCartBadge() // Ensure badge is up-to-date when returning
+        currentBook?.let { // Re-check wishlist status
+            isWishlisted = UserDataRepository.isInWishlist(it.id)
+            updateWishlistIcon()
+        }
+    }
 
     private fun updateQuantityDisplay() {
         tvQuantity.text = quantity.toString()
@@ -267,23 +297,25 @@ class BookDetailsActivity : AppCompatActivity() {
 
 
     private fun loadSimilarBooks(currentBookId: String) {
-        // Dummy similar books - in real app, get this from API/DB
-        val similar = listOf(
-            Book("s1", "JavaScript and JQuery", "Jon Duckett", price = "EGP 180", imageUrl="js_jquery_cover"),
-            Book("s2", "Responsive Web Design", "Ethan Marcotte", price = "EGP 150", imageUrl="responsive_web_cover"),
-            Book("s3", "Neuro Web Design", "Susan Weinschenk", price = "EGP 170", imageUrl="neuro_web_cover")
-        )
-        // You'd filter out the currentBookId if it could appear here
+        // Get some books from the repository, excluding the current one
+        val similar = BookRepository.allBooks
+            .filter { it.id != currentBookId && it.category == currentBook?.category } // Same category, different book
+            .shuffled()
+            .take(5)
 
-        similarBooksAdapter = BookAdapter(similar) { book ->
-            // When a similar book is clicked, you might open another BookDetailsActivity
-            val intent = Intent(this, BookDetailsActivity::class.java)
-            intent.putExtra(EXTRA_BOOK_ID, book.id)
-            startActivity(intent)
-            // Potentially finish this one or let the back stack handle it
+        if (::similarBooksAdapter.isInitialized) { // Check if adapter is initialized
+            // If you want to update adapter data:
+            // similarBooksAdapter.updateData(similar) // You'd need an updateData method in BookAdapter
+        } else {
+            similarBooksAdapter = BookAdapter(similar) { book ->
+                val intent = Intent(this, BookDetailsActivity::class.java)
+                intent.putExtra(EXTRA_BOOK_ID, book.id)
+                startActivity(intent)
+                finish() // Finish current details to avoid stacking same activity
+            }
+            rvSimilarBooks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            rvSimilarBooks.adapter = similarBooksAdapter
         }
-        rvSimilarBooks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvSimilarBooks.adapter = similarBooksAdapter
     }
 
 

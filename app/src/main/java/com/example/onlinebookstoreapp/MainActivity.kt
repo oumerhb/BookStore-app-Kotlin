@@ -3,6 +3,8 @@ package com.example.onlinebookstoreapp
 // MainActivity.kt (or your Fragment)
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -54,12 +56,48 @@ class MainActivity : AppCompatActivity() {
                     loadLibraryData()
                     true
                 }
-
+                R.id.nav_wishlist -> { // Ensure this ID is in bottom_nav_menu.xml
+                    loadWishlistData()
+                    true
+                }
+                R.id.nav_cart -> { // Ensure this ID is in bottom_nav_menu.xml
+                    loadCartData()
+                    true
+                }
                 else -> false
             }
         }
         if (savedInstanceState == null) {
             bottomNav.selectedItemId = R.id.nav_home // Select home by default
+        }
+        updateToolbarCartBadge()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateToolbarCartBadge()
+
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        when (bottomNav.selectedItemId) {
+            R.id.nav_wishlist -> loadWishlistData()
+            R.id.nav_cart -> loadCartData()
+            // Home and Library might also need refresh if their underlying data can change
+            // while the app is in background, but typically less critical than wishlist/cart.
+        }
+    }
+    fun onMainCartIconClicked(view: View) {
+        findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId = R.id.nav_cart
+    }
+
+
+    private fun updateToolbarCartBadge() {
+        val cartBadgeTextView = findViewById<TextView>(R.id.tv_cart_badge_toolbar_main) // Ensure this ID is correct
+        val itemCount = UserDataRepository.getCartItemCount()
+        if (itemCount > 0) {
+            cartBadgeTextView.text = itemCount.toString()
+            cartBadgeTextView.visibility = View.VISIBLE
+        } else {
+            cartBadgeTextView.visibility = View.GONE
         }
     }
     private fun setupRecyclerView() {
@@ -86,72 +124,85 @@ class MainActivity : AppCompatActivity() {
         // loadHomeData() // Load initial data after adapter is set
     }
 
-    private fun loadHomeData() {
-        // Sample Data
-        val recentlyReadBooks = listOf(
-            Book("1", "The Midnight Library", "Matt Haig", price = "$10.99"),
-            Book("2", "Klara and the Sun", "Kazuo Roguish", price = "$12.50"),
-            Book("3", "Project Hail Mary", "Andy Weir", price = "$11.00")
-        )
-        val bestSellerBooks = listOf(
-            Book("4", "Atomic Habits", "James Clear", price = "$9.99"),
-            Book("5", "The Vanishing Half", "Brit Bennett", price = "$14.00"),
-            Book("6", "Where the Crawdads Sing", "Delia Owens", price = "$8.50"),
-            Book("7", "Another Great Book", "Some Author", price = "$13.20")
-        )
-        val saleBooks = listOf(
-            Book("8", "Old Classic", "Famous Writer", price = "$5.00 (Sale)"),
-            Book("9", "Hidden Gem", "New Talent", price = "$4.50 (Sale)")
-        )
-
-        val filters = listOf(
-            FilterOption("f1", "Fiction"),
-            FilterOption("f2", "Non-Fiction"),
-            FilterOption("f3", "Sci-Fi"),
-            FilterOption("f4", "Mystery"),
-            FilterOption("f5", "Biography")
-        )
+    private fun loadHomeData(filterCategory: String = "All") {
+        supportActionBar?.title = if (filterCategory == "All") "Bookstore" else filterCategory
+        val allBooksForHome = BookRepository.allBooks // Use BookRepository
 
         val homeScreenItems = mutableListOf<HomeScreenItem>()
-        homeScreenItems.add(HomeScreenItem.CategoryRow(Category("Recently read", recentlyReadBooks)))
-        homeScreenItems.add(HomeScreenItem.FilterRow(filters)) // Add filters here
-        homeScreenItems.add(HomeScreenItem.CategoryRow(Category("Best seller", bestSellerBooks)))
-        homeScreenItems.add(HomeScreenItem.CategoryRow(Category("Books on sale", saleBooks)))
-        // Add more sections as needed
-
+        if (filterCategory.equals("All", ignoreCase = true)) {
+            // Show multiple sections for "All"
+            homeScreenItems.add(HomeScreenItem.CategoryRow(Category("Recently read", allBooksForHome.shuffled().take(4))))
+            homeScreenItems.add(HomeScreenItem.FilterRow( // Example filters
+                listOf(FilterOption("f1", "Fiction"), FilterOption("f2", "Science"), FilterOption("f3", "Design"))
+            ))
+            homeScreenItems.add(HomeScreenItem.CategoryRow(Category("Best seller", allBooksForHome.shuffled().take(5))))
+            homeScreenItems.add(HomeScreenItem.CategoryRow(Category("Books on sale", allBooksForHome.filter { it.price?.contains("Sale", true) == true || (it.discountPercent ?: 0) > 0 }.take(4))))
+        } else {
+            // Show a single list for the selected category
+            val filteredBooks = allBooksForHome.filter { it.category.equals(filterCategory, ignoreCase = true) }
+            if (filteredBooks.isNotEmpty()) {
+                homeScreenItems.add(HomeScreenItem.CategoryRow(Category(filterCategory, filteredBooks)))
+            } else {
+                homeScreenItems.add(HomeScreenItem.CategoryRow(Category("No books in $filterCategory", emptyList())))
+            }
+            // Optionally add filters row here too if desired for filtered views
+        }
         homeScreenAdapter.updateData(homeScreenItems)
     }
+
     private fun loadLibraryData() {
         supportActionBar?.title = "My Library"
-
-        // Sample data for library - in a real app, these would be user's purchased/saved books
-        val libraryBooks = listOf(
-            Book("dm", "Don't Make Me Think", "Steve Krug", category = "Web design", imageUrl = "dont_make_me_think_cover"),
-            Book("dj", "Design is a Job", "Mike Monteiro", category = "Web design", imageUrl = "design_is_a_job_cover"),
-            Book("dw", "Designing with Web Standards", "Jeffrey Zeldman", category = "Web design", imageUrl = "designing_with_web_standards_cover"),
-            Book("s1", "JavaScript and JQuery", "Jon Duckett", category = "Web design", imageUrl = "js_jquery_cover"),
-            Book("s2", "Responsive Web Design", "Ethan Marcotte", category = "Web design", imageUrl = "responsive_web_cover"),
-            Book("s3", "Neuro Web Design", "Susan Weinschenk", category = "Web design", imageUrl = "neuro_web_cover"),
-            Book("1", "The Midnight Library", "Matt Haig", category = "Romance", imageUrl = "placeholder_image_simple_x"),
-            Book("2", "Klara and the Sun", "Kazuo Ishiguro", category = "Science", imageUrl = "placeholder_image_simple_x"),
-            Book("4", "Atomic Habits", "James Clear", category = "Design", imageUrl = "placeholder_image_simple_x")
-            // Add more books with different categories
-        )
-
-        val booksByCategory = libraryBooks.groupBy { it.category }
+        // For demo, show a sample of books. In a real app, this would be user's "owned" books.
+        val libraryBooksSample = BookRepository.allBooks.shuffled().take(10)
+        val booksByCategory = libraryBooksSample.groupBy { it.category }
         val libraryScreenItems = mutableListOf<HomeScreenItem>()
 
         booksByCategory.forEach { (categoryName, booksInCategory) ->
             libraryScreenItems.add(HomeScreenItem.CategoryGridRow(Category(categoryName, booksInCategory)))
         }
-
         if (libraryScreenItems.isEmpty()) {
-            // You can add a placeholder item for an empty library
-            // e.g., a TextView in a custom layout
-            homeScreenAdapter.updateData(listOf(HomeScreenItem.CategoryGridRow(Category("Your Library is Empty", emptyList()))))
-
-        } else {
-            homeScreenAdapter.updateData(libraryScreenItems)
+            libraryScreenItems.add(HomeScreenItem.CategoryGridRow(Category("Your Library is Empty", emptyList())))
         }
+        homeScreenAdapter.updateData(libraryScreenItems)
+    }
+
+    private fun loadWishlistData() {
+        supportActionBar?.title = "My Wishlist"
+        val wishlistIds = UserDataRepository.getWishlistBookIds()
+        val wishlistBooks = BookRepository.getBooksByIds(wishlistIds)
+        val wishlistScreenItems = mutableListOf<HomeScreenItem>()
+
+        if (wishlistBooks.isNotEmpty()) {
+            // Display as a single grid. You can choose CategoryRow for a list.
+            wishlistScreenItems.add(HomeScreenItem.CategoryGridRow(Category("Wishlisted Books (${wishlistBooks.size})", wishlistBooks)))
+        } else {
+            wishlistScreenItems.add(HomeScreenItem.CategoryGridRow(Category("Your Wishlist is Empty", emptyList())))
+        }
+        homeScreenAdapter.updateData(wishlistScreenItems)
+    }
+
+    private fun loadCartData() {
+        supportActionBar?.title = "Shopping Cart"
+        val cartDataMap = UserDataRepository.getCartItems() // Map<BookID, Quantity>
+        val cartBookIds = cartDataMap.keys
+        val booksInCartDetails = BookRepository.getBooksByIds(cartBookIds)
+        val cartScreenItems = mutableListOf<HomeScreenItem>()
+
+        if (booksInCartDetails.isNotEmpty()) {
+            // For now, displaying as a simple list. A real cart needs a custom item layout.
+            // To show quantity, you'd need to modify BookAdapter or create a new CartAdapter.
+            // For simplicity, we'll just list the books.
+            val cartBooksForDisplay = booksInCartDetails.map { book ->
+                val quantity = cartDataMap[book.id] ?: 0
+                // You could augment the book title or use a custom data class for display
+                // Book(id=book.id, title="${book.title} (x$quantity)", ...rest of book properties)
+                book // Returning original book for now
+            }
+            cartScreenItems.add(HomeScreenItem.CategoryRow(Category("Items in Cart: ${UserDataRepository.getCartItemCount()}", cartBooksForDisplay)))
+            // TODO: Add a section for Total Price and Checkout Button. This would be a new HomeScreenItem type.
+        } else {
+            cartScreenItems.add(HomeScreenItem.CategoryRow(Category("Your Cart is Empty", emptyList())))
+        }
+        homeScreenAdapter.updateData(cartScreenItems)
     }
 }
