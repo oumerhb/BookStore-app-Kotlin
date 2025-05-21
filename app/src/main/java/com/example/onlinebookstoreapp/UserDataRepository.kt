@@ -29,7 +29,7 @@ object UserDataRepository {
         // In a real app, you might have a max quantity or other checks
     }
 
-    private fun removeFromCart(bookId: String) {
+     fun removeFromCart(bookId: String) {
         cartItems.remove(bookId)
     }
 
@@ -39,6 +39,16 @@ object UserDataRepository {
         } else {
             cartItems[bookId] = newQuantity
         }
+    }
+    fun getTotalCartPrice(): Double {
+        var total = 0.0
+        cartItems.forEach { (bookId, quantity) ->
+            val book = BookRepository.getBookById(bookId)
+            book?.let {
+                total += it.getNumericPrice() * quantity
+            }
+        }
+        return total
     }
 
     fun getCartItems(): Map<String, Int> {

@@ -23,4 +23,12 @@
     <string name="details_not_available">Details not available.</string>
     <string name="sample_reviews">Review 1: Great book!\nReview 2: Very insightful.</string>
     <string name="view_all">View all</string>
+    <string name="logout">Logout</string>
+    <string name="order_summary">Order Summary</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="shipping">Shipping</string>
+    <string name="total">Total</string>
+    <string name="proceed_to_checkout">Proceed to Checkout</string>
+    <string name="empty_state_icon">Empty state icon</string>
+    <string name="price_format">EGP %.2f</string>
 </resources>

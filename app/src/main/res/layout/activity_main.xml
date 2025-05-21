@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_cart"
             android:layout_gravity="center_vertical"
-            android:contentDescription="Cart"/>
+            android:contentDescription="@string/cart"/>
         <TextView
             android:id="@+id/tv_cart_badge_toolbar_main"
             android:layout_width="18dp"
@@ -79,7 +79,7 @@
         android:drawableEnd="@android:drawable/ic_menu_search"
         android:layout_margin="8dp"
         android:padding="10dp"
-        android:background="@drawable/search_bar_background" /> <!-- Create search_bar_background.xml drawable -->
+        android:background="@drawable/search_bar_background" />
 
 
   </com.google.android.material.appbar.AppBarLayout>

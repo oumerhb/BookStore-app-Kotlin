@@ -11,7 +11,7 @@
         android:id="@+id/imageView"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:contentDescription="Logout"
+        android:contentDescription="@string/logout"
         android:src="@drawable/ic_logout"
         app:layout_constraintBottom_toBottomOf="@+id/logoutButton"
         app:layout_constraintEnd_toStartOf="@+id/logoutButton"

@@ -1,6 +1,6 @@
 package com.example.onlinebookstoreapp
 
-// MainActivity.kt (or your Fragment)
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -56,11 +56,11 @@ class MainActivity : AppCompatActivity() {
                     loadLibraryData()
                     true
                 }
-                R.id.nav_wishlist -> { // Ensure this ID is in bottom_nav_menu.xml
+                R.id.nav_wishlist -> {
                     loadWishlistData()
                     true
                 }
-                R.id.nav_cart -> { // Ensure this ID is in bottom_nav_menu.xml
+                R.id.nav_cart -> {
                     loadCartData()
                     true
                 }
@@ -115,13 +115,27 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, BookDetailsActivity::class.java)
                 intent.putExtra(BookDetailsActivity.EXTRA_BOOK_ID, book.id)
                 startActivity(intent)
+            },
+            onCheckoutClicked = {
+                Toast.makeText(this, "Proceeding to Checkout...", Toast.LENGTH_LONG).show()
+                // Implement checkout navigation or process
+            },
+            onRemoveCartItemClicked = { bookId ->
+                UserDataRepository.removeFromCart(bookId)
+                Toast.makeText(this, "Item removed", Toast.LENGTH_SHORT).show()
+                loadCartData() // Reload cart data to reflect changes
+                updateToolbarCartBadge()
+            },
+            onUpdateCartItemQuantity = { bookId, newQuantity ->
+                UserDataRepository.updateCartItemQuantity(bookId, newQuantity)
+                loadCartData() // Reload
+                updateToolbarCartBadge()
             }
         )
         mainRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = homeScreenAdapter
         }
-        // loadHomeData() // Load initial data after adapter is set
     }
 
     private fun loadHomeData(filterCategory: String = "All") {
@@ -183,25 +197,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadCartData() {
         supportActionBar?.title = "Shopping Cart"
-        val cartDataMap = UserDataRepository.getCartItems() // Map<BookID, Quantity>
-        val cartBookIds = cartDataMap.keys
-        val booksInCartDetails = BookRepository.getBooksByIds(cartBookIds)
+        val cartDataMap = UserDataRepository.getCartItems()
         val cartScreenItems = mutableListOf<HomeScreenItem>()
 
-        if (booksInCartDetails.isNotEmpty()) {
-            // For now, displaying as a simple list. A real cart needs a custom item layout.
-            // To show quantity, you'd need to modify BookAdapter or create a new CartAdapter.
-            // For simplicity, we'll just list the books.
-            val cartBooksForDisplay = booksInCartDetails.map { book ->
-                val quantity = cartDataMap[book.id] ?: 0
-                // You could augment the book title or use a custom data class for display
-                // Book(id=book.id, title="${book.title} (x$quantity)", ...rest of book properties)
-                book // Returning original book for now
-            }
-            cartScreenItems.add(HomeScreenItem.CategoryRow(Category("Items in Cart: ${UserDataRepository.getCartItemCount()}", cartBooksForDisplay)))
-            // TODO: Add a section for Total Price and Checkout Button. This would be a new HomeScreenItem type.
+        if (cartDataMap.isEmpty()) {
+            cartScreenItems.add(HomeScreenItem.EmptyStateItem("Your cart is empty. Start shopping!", R.drawable.ic_cart))
         } else {
-            cartScreenItems.add(HomeScreenItem.CategoryRow(Category("Your Cart is Empty", emptyList())))
+            cartDataMap.forEach { (bookId, quantity) ->
+                BookRepository.getBookById(bookId)?.let { book ->
+                    cartScreenItems.add(HomeScreenItem.CartItemEntry(book, quantity))
+                }
+            }
+            // Add summary at the end
+            val totalItems = UserDataRepository.getCartItemCount()
+            val totalPrice = UserDataRepository.getTotalCartPrice()
+            cartScreenItems.add(HomeScreenItem.CartSummary(totalItems, totalPrice))
         }
         homeScreenAdapter.updateData(cartScreenItems)
     }

@@ -3,6 +3,9 @@ package com.example.onlinebookstoreapp
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,13 +16,19 @@ class HomeScreenAdapter(
     private var items: List<HomeScreenItem>,
     private val onFilterClicked: (FilterOption) -> Unit,
     private val onSeeAllClicked: (String) -> Unit,
-    private val onBookClicked: (Book) -> Unit
+    private val onBookClicked: (Book) -> Unit,
+    private val onRemoveCartItemClicked: (bookId: String) -> Unit,
+    private val onUpdateCartItemQuantity: (bookId: String, newQuantity: Int) -> Unit,
+    private val onCheckoutClicked: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val TYPE_CATEGORY = 0
         private const val TYPE_FILTER = 1
         private const val TYPE_CATEGORY_GRID = 2
+        private const val TYPE_CART_ITEM = 3
+        private const val TYPE_CART_SUMMARY = 4
+        private const val TYPE_EMPTY_STATE = 5
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -27,6 +36,9 @@ class HomeScreenAdapter(
             is HomeScreenItem.CategoryRow -> TYPE_CATEGORY
             is HomeScreenItem.FilterRow -> TYPE_FILTER
             is HomeScreenItem.CategoryGridRow -> TYPE_CATEGORY_GRID
+            is HomeScreenItem.CartItemEntry -> TYPE_CART_ITEM
+            is HomeScreenItem.CartSummary -> TYPE_CART_SUMMARY
+            is HomeScreenItem.EmptyStateItem -> TYPE_EMPTY_STATE
         }
     }
 
@@ -47,6 +59,21 @@ class HomeScreenAdapter(
                     .inflate(R.layout.item_category_grid_row, parent, false)
                 CategoryGridViewHolder(view)
             }
+            TYPE_CART_ITEM -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_cart_book, parent, false)
+                CartItemViewHolder(view)
+            }
+            TYPE_CART_SUMMARY -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_cart_summary, parent, false)
+                CartSummaryViewHolder(view)
+            }
+            TYPE_EMPTY_STATE -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_empty_state, parent, false)
+                EmptyStateViewHolder(view)
+            }
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
@@ -56,6 +83,9 @@ class HomeScreenAdapter(
             is HomeScreenItem.CategoryRow -> (holder as CategoryHorizontalViewHolder).bind(currentItem.category,onBookClicked)
             is HomeScreenItem.FilterRow -> (holder as FilterViewHolder).bind(currentItem)
             is HomeScreenItem.CategoryGridRow -> (holder as CategoryGridViewHolder).bind(currentItem.category, onBookClicked)
+            is HomeScreenItem.CartItemEntry -> (holder as CartItemViewHolder).bind(currentItem)
+            is HomeScreenItem.CartSummary -> (holder as CartSummaryViewHolder).bind(currentItem)
+            is HomeScreenItem.EmptyStateItem -> (holder as EmptyStateViewHolder).bind(currentItem)
         }
     }
 
@@ -67,7 +97,88 @@ class HomeScreenAdapter(
     }
 
     // --- ViewHolders ---
+    inner class CartItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val coverImageView: ImageView = itemView.findViewById(R.id.iv_cart_book_cover)
+        private val titleTextView: TextView = itemView.findViewById(R.id.tv_cart_book_title)
+        private val authorTextView: TextView = itemView.findViewById(R.id.tv_cart_book_author)
+        private val priceTextView: TextView = itemView.findViewById(R.id.tv_cart_book_price)
+        private val quantityTextView: TextView = itemView.findViewById(R.id.tv_cart_quantity)
+        private val removeButton: ImageButton = itemView.findViewById(R.id.ib_cart_remove_item)
+        private val plusButton: ImageButton = itemView.findViewById(R.id.ib_cart_quantity_plus)
+        private val minusButton: ImageButton = itemView.findViewById(R.id.ib_cart_quantity_minus)
 
+        fun bind(cartItem: HomeScreenItem.CartItemEntry) {
+            val book = cartItem.book
+            titleTextView.text = book.title
+            authorTextView.text = book.author
+            priceTextView.text = book.price ?: "N/A" // Or format book.getNumericPrice()
+            quantityTextView.text = cartItem.quantity.toString()
+
+            // Load image (Glide example)
+            // Glide.with(itemView.context).load(book.imageUrl).placeholder(R.drawable.placeholder_image_simple_x).into(coverImageView)
+            if (book.imageUrl != null && book.imageUrl.isNotBlank()) {
+                val resId = itemView.context.resources.getIdentifier(book.imageUrl, "drawable", itemView.context.packageName)
+                if (resId != 0) coverImageView.setImageResource(resId) else coverImageView.setImageResource(R.drawable.placeholder_book_cover_with_x)
+            } else {
+                coverImageView.setImageResource(R.drawable.placeholder_book_cover_with_x)
+            }
+
+
+            removeButton.setOnClickListener {
+                onRemoveCartItemClicked(book.id)
+            }
+            plusButton.setOnClickListener {
+                val newQuantity = cartItem.quantity + 1
+                // No need to update cartItem.quantity here, MainActivity will reload data
+                onUpdateCartItemQuantity(book.id, newQuantity)
+            }
+            minusButton.setOnClickListener {
+                if (cartItem.quantity > 1) {
+                    val newQuantity = cartItem.quantity - 1
+                    onUpdateCartItemQuantity(book.id, newQuantity)
+                } else {
+                    // If quantity is 1 and minus is clicked, remove the item
+                    onRemoveCartItemClicked(book.id)
+                }
+            }
+        }
+    }
+
+    inner class CartSummaryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val subtotalPriceTextView: TextView = itemView.findViewById(R.id.tv_cart_subtotal_price)
+        private val shippingPriceTextView: TextView = itemView.findViewById(R.id.tv_cart_shipping_price) // Assuming fixed shipping
+        private val totalPriceTextView: TextView = itemView.findViewById(R.id.tv_cart_total_price)
+        private val checkoutButton: Button = itemView.findViewById(R.id.btn_cart_checkout)
+
+        fun bind(summary: HomeScreenItem.CartSummary) {
+            val context = itemView.context
+            val shippingCost = 25.0 // Example fixed shipping
+            val subtotal = summary.totalPrice
+            val total = subtotal + shippingCost
+
+            subtotalPriceTextView.text = context.getString(R.string.price_format, subtotal) // "EGP %.2f"
+            shippingPriceTextView.text = context.getString(R.string.price_format, shippingCost)
+            totalPriceTextView.text = context.getString(R.string.price_format, total)
+
+            checkoutButton.setOnClickListener {
+                onCheckoutClicked()
+            }
+        }
+    }
+    inner class EmptyStateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val iconImageView: ImageView = itemView.findViewById(R.id.iv_empty_state_icon)
+        private val messageTextView: TextView = itemView.findViewById(R.id.tv_empty_state_message)
+
+        fun bind(emptyState: HomeScreenItem.EmptyStateItem) {
+            messageTextView.text = emptyState.message
+            if (emptyState.iconResId != null) {
+                iconImageView.setImageResource(emptyState.iconResId)
+                iconImageView.visibility = View.VISIBLE
+            } else {
+                iconImageView.visibility = View.GONE
+            }
+        }
+    }
     inner class CategoryHorizontalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val categoryTitleTextView: TextView = itemView.findViewById(R.id.tv_category_title)
         private val seeAllTextView: TextView = itemView.findViewById(R.id.tv_see_all)

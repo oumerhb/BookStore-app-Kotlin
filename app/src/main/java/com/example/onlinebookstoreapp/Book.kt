@@ -1,5 +1,7 @@
 package com.example.onlinebookstoreapp
 
+import android.os.Parcelable
+
 data class Book(
     val id: String,
     val title: String,
@@ -8,4 +10,10 @@ data class Book(
     val price: String? = null, // Or a more specific Price object
     val discountPercent: Int? = null,
     var category: String = "General"
-)
+){
+  fun getNumericPrice(): Double {
+    return price?.replace("EGP", "", ignoreCase = true)
+        ?.replace("$", "")?.trim()
+        ?.toDoubleOrNull() ?: 0.0
+}
+}

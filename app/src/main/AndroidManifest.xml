@@ -16,7 +16,7 @@
             android:name=".BookDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.OnlineBookStoreApp.NoActionBar">
             <intent-filter>
@@ -26,10 +26,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OnboardingActivity"
-            android:exported="false"
-            android:theme="@style/Theme.OnlineBookStoreApp.NoActionBar" />
-        <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.OnlineBookStoreApp.NoActionBar" />
@@ -38,16 +34,11 @@
             android:exported="false"
             android:theme="@style/Theme.OnlineBookStoreApp.NoActionBar" />
         <activity
-            android:name=".SearchActivity"
-            android:exported="false"
-            android:theme="@style/Theme.OnlineBookStoreApp.NoActionBar"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".AccountActivity"
             android:exported="false"
             android:theme="@style/Theme.OnlineBookStoreApp.NoActionBar" />
         <activity
-            android:name=".MainActivity"
+            android:name=".OnboardingActivity"
             android:exported="false" />
     </application>
 
