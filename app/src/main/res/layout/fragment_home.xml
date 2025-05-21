@@ -51,16 +51,6 @@
                     android:text="@string/header_subtitle"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/explore_now"
-                    app:cornerRadius="20dp"
-                    app:icon="@drawable/search"
-                    app:iconGravity="textStart"
-                    app:iconTint="@color/white" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -97,8 +87,9 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <GridView
-            android:id="@+id/categoriesGridView"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/categoriesRecyclerView"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
