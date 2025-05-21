@@ -31,4 +31,15 @@
     <string name="proceed_to_checkout">Proceed to Checkout</string>
     <string name="empty_state_icon">Empty state icon</string>
     <string name="price_format">EGP %.2f</string>
+    <string name="welcome_message">Welcome to BookNook</string>
+    <string name="header_subtitle">Discover your next favorite read</string>
+    <string name="explore_now">Explore Now</string>
+    <string name="featured_books">Featured Books</string>
+    <string name="book_categories">Categories</string>
+    <string name="new_arrivals">New Arrivals</string>
+    <string name="header_image_desc">Bookshelf header image</string>
+    <string name="book_image_desc">Book cover image</string>
+    <string name="category_icon_desc">Category icon</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

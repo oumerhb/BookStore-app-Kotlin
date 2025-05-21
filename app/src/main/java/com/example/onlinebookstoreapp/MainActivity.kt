@@ -5,6 +5,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.commit
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -12,5 +14,37 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+        if (savedInstanceState == null) {
+            supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(R.id.fragmentContainerView, HomeFragment::class.java, null)
+            }
+        }
+
+        // Set up bottom navigation
+        findViewById<BottomNavigationView>(R.id.bottom_navigation).setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    supportFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace(R.id.fragmentContainerView, HomeFragment::class.java, null)
+                    }
+                    true
+                }
+                R.id.nav_search -> {
+                    // Replace with SearchFragment
+                    true
+                }
+                R.id.nav_cart -> {
+                    // Replace with CartFragment
+                    true
+                }
+                R.id.nav_profile -> {
+                    // Replace with ProfileFragment
+                    true
+                }
+                else -> false
+            }
+        }
     }
 }
