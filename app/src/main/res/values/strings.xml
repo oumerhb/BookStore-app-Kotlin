@@ -40,6 +40,18 @@
     <string name="header_image_desc">Bookshelf header image</string>
     <string name="book_image_desc">Book cover image</string>
     <string name="category_icon_desc">Category icon</string>
+    <string name="search_hint">Search by title, author, or ISBN</string>
+    <string name="filter">Filter</string>
+    <string name="sort">Sort</string>
+    <string name="filter_by">Filter by</string>
+    <string name="genre">Genre</string>
+    <string name="all">All</string>
+    <string name="fiction">Fiction</string>
+    <string name="mystery">Mystery</string>
+    <string name="price_range">Price Range</string>
+    <string name="apply_filters">Apply Filters</string>
+    <string name="no_results_found">No results found</string>
+    <string name="try_different_search">Try a different search or adjust your filters</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -6,8 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.RatingBar
@@ -174,7 +172,6 @@ class NewArrivalsAdapter(private val books: List<Book>) :
         val author: TextView = itemView.findViewById(R.id.newArrivalAuthor)
         val rating: RatingBar = itemView.findViewById(R.id.newArrivalRating)
         val price: TextView = itemView.findViewById(R.id.newArrivalPrice)
-        val originalPrice: TextView = itemView.findViewById(R.id.newArrivalOriginalPrice)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Material dynamic colors (available in Material Components 1.5.0+) -->
+    <color name="material_dynamic_primary90">#EADDFF</color>
+    <color name="material_dynamic_neutral95">#F5F5F5</color>
+    <color name="material_dynamic_outline">#1F000000</color>
+
+    <!-- Or use static colors if you prefer -->
+    <color name="chip_background">#EADDFF</color>
+    <color name="card_stroke">#1F000000</color>
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
@@ -18,4 +27,11 @@
     <color name="primary_light">#BB86FC</color>
     <color name="light_gray">#F5F5F5</color>
     <color name="dark_gray">#757575</color>
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+
 </resources>

@@ -32,7 +32,10 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_search -> {
-                    // Replace with SearchFragment
+                    supportFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        replace(R.id.fragmentContainerView, SearchFragment::class.java, null)
+                    }
                     true
                 }
                 R.id.nav_cart -> {
