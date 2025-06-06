@@ -44,6 +44,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_profile -> {
                     // Replace with ProfileFragment
+                    supportFragmentManager.commit {
+                        setReorderingAllowed(true)
+                        add(R.id.fragmentContainerView, UserProfileFragment::class.java, null)
+                    }
                     true
                 }
                 else -> false
