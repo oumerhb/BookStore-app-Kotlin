@@ -2,68 +2,63 @@ package com.example.onlinebookstoreapp
 
 
 import android.os.Bundle
-import android.view.*
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import com.example.onlinebookstoreapp.databinding.FragmentUserProfileBinding
 
-
-class UserProfileFragment : Fragment() {
+class UserAccountFragment : Fragment() {
 
     private var _binding: FragmentUserProfileBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var drawerToggle: ActionBarDrawerToggle
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)  // Important for toolbar menu in fragment
-    }
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentUserProfileBinding.inflate(inflater, container, false)
-
-        val activity = requireActivity() as AppCompatActivity
-        activity.setSupportActionBar(binding.toolbar)
-
-// Re-apply manual styling
-        binding.toolbar.setBackgroundColor(resources.getColor(R.color.light_violet, null))
-        binding.toolbar.setTitleTextColor(resources.getColor(R.color.white, null))
-        binding.toolbar.navigationIcon?.setTint(resources.getColor(R.color.white, null))
-
-
-        drawerToggle = ActionBarDrawerToggle(
-            activity,
-            binding.drawerLayout,
-            binding.toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-
-        binding.drawerLayout.addDrawerListener(drawerToggle)
-        drawerToggle.syncState()
-
-        // Needed to show hamburger
-        activity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        activity.supportActionBar?.setHomeButtonEnabled(true)
-
-        binding.navView.setNavigationItemSelectedListener {
-            // Handle clicks later
-            true
-        }
-
         return binding.root
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Make toggle respond to clicks
-        return if (drawerToggle.onOptionsItemSelected(item)) {
-            true
-        } else super.onOptionsItemSelected(item)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupClickListeners()
+        loadUserData()
+    }
+
+
+
+    private fun setupClickListeners() {
+        binding.ordersItem.setOnClickListener {
+            Snackbar.make(binding.root, "Orders clicked", Snackbar.LENGTH_SHORT).show()
+        }
+
+        binding.addressesItem.setOnClickListener {
+            Snackbar.make(binding.root, "Addresses clicked", Snackbar.LENGTH_SHORT).show()
+        }
+
+        binding.settingsItem.setOnClickListener {
+            Snackbar.make(binding.root, "Settings clicked", Snackbar.LENGTH_SHORT).show()
+        }
+
+        binding.helpItem.setOnClickListener {
+            Snackbar.make(binding.root, "Help clicked", Snackbar.LENGTH_SHORT).show()
+        }
+
+        binding.logoutButton.setOnClickListener {
+            Snackbar.make(binding.root, "Logout clicked", Snackbar.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun loadUserData() {
+        // In a real app, you would load this from your data source
+        binding.userName.text = "John Doe"
+        binding.userEmail.text = "john.doe@example.com"
+        // binding.profileImage.setImageResource(...)
     }
 
     override fun onDestroyView() {

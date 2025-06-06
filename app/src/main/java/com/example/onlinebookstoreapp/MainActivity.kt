@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.commit
+import com.example.onlinebookstoreapp.databinding.FragmentUserProfileBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
                     // Replace with ProfileFragment
                     supportFragmentManager.commit {
                         setReorderingAllowed(true)
-                        add(R.id.fragmentContainerView, UserProfileFragment::class.java, null)
+                        add(R.id.fragmentContainerView, UserAccountFragment::class.java, null)
                     }
                     true
                 }
