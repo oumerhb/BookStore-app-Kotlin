@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_cart -> {
                     // Replace with CartFragment
+                    supportFragmentManager.commit {
+                        add(R.id.fragmentContainerView, CartFragment::class.java, null)
+                    }
                     true
                 }
                 R.id.nav_profile -> {
