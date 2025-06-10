@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="chip_icon_start_padding">4dp</dimen>
-    <dimen name="chip_icon_end_padding">0dp</dimen>
-    <dimen name="mtrl_chip_icon_size" />
-</resources>

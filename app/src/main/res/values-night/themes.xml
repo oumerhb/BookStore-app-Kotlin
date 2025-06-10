@@ -1,7 +1,25 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.OnlineBookStoreApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+<resources>
+    <style name="Theme.OnlineBookStoreApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Dark background for app bars and surfaces -->
+        <item name="colorPrimary">#121212</item>
+
+        <!-- Softer off-white for text/icons on primary surfaces -->
+        <item name="colorOnPrimary">#E0E0E0</item> <!-- Light gray instead of pure white -->
+
+        <!-- Dark surface background -->
+        <item name="colorSurface">#1E1E1E</item>
+
+        <!-- Softer off-white for general text/icons -->
+        <item name="colorOnSurface">#E0E0E0</item> <!-- Same light gray -->
+
+        <!-- Status bar matches primary dark -->
+        <item name="android:statusBarColor">#121212</item>
+
+        <!-- Outline color for borders and placeholders -->
+        <item name="colorOutline">#757575</item> <!-- Medium gray -->
+
+        <!-- Material component styles -->
+        <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
+        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
     </style>
 </resources>
