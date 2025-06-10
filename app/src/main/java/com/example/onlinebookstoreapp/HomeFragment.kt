@@ -11,7 +11,6 @@ import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.RatingBar
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -19,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 class HomeFragment : Fragment() {
 
     private lateinit var featuredRecyclerView: RecyclerView
-    private lateinit var categoriesRecyclerView: RecyclerView
+    private lateinit var categoriesGridView: GridView
     private lateinit var newArrivalsRecyclerView: RecyclerView
 
     private lateinit var featuredAdapter: FeaturedBooksAdapter
@@ -38,7 +37,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         featuredRecyclerView = view.findViewById(R.id.featuredRecyclerView)
-        categoriesRecyclerView = view.findViewById(R.id.categoriesRecyclerView)
+        categoriesGridView = view.findViewById(R.id.categoriesGridView)
         newArrivalsRecyclerView = view.findViewById(R.id.newArrivalsRecyclerView)
 
         setupFeaturedBooks()
@@ -57,10 +56,7 @@ class HomeFragment : Fragment() {
 
     private fun setupCategories() {
         categoriesAdapter = CategoriesAdapter(getCategories())
-        categoriesRecyclerView.apply {
-            adapter = categoriesAdapter
-            layoutManager = GridLayoutManager(requireContext(), 2, RecyclerView.HORIZONTAL, false)
-        }
+        categoriesGridView.adapter = categoriesAdapter
     }
 
     private fun setupNewArrivals() {
@@ -140,28 +136,25 @@ class FeaturedBooksAdapter(private val books: List<Book>) :
     override fun getItemCount() = books.size
 }
 
-class CategoriesAdapter(private val categories: List<Category>) : RecyclerView.Adapter<CategoriesAdapter.ViewHolder>() {
+class CategoriesAdapter(private val categories: List<Category>) : BaseAdapter() {
+    override fun getCount() = categories.size
+    override fun getItem(position: Int) = categories[position]
+    override fun getItemId(position: Int) = position.toLong()
 
-    class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        val textView: TextView = itemView.findViewById<TextView>(R.id.categoryName)
-        val image: ImageView = itemView.findViewById<ImageView>(R.id.categoryIcon)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val view = convertView ?: LayoutInflater.from(parent?.context)
             .inflate(R.layout.books_category, parent, false)
 
-        return ViewHolder(view)
-    }
+        val category = categories[position]
+        view.findViewById<ImageView>(R.id.categoryIcon).setImageResource(category.iconRes)
+        view.findViewById<TextView>(R.id.categoryName).text = category.name
+        view.findViewById<TextView>(R.id.categoryCount).text = "${category.count} books"
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val cat = categories[position]
-        holder.textView.text = cat.name
-        holder.image.setImageResource(cat.iconRes)
-    }
+        view.setOnClickListener {
+            // Handle category click
+        }
 
-    override fun getItemCount(): Int {
-        return categories.size
+        return view
     }
 }
 
