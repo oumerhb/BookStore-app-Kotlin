@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginBottom="8dp"
-    app:cardElevation="2dp"
-    app:strokeColor="@color/material_dynamic_outline"
-    app:strokeWidth="1dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,53 +15,63 @@
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/iv_book_cover"
+            android:id="@+id/ivBookCover"
             android:layout_width="80dp"
             android:layout_height="120dp"
+            android:layout_marginEnd="16dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/book"
-            android:contentDescription="Book cover"/>
+            tools:src="@drawable/book" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="16dp"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_book_title"
+                android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                tools:text="Book Title"/>
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Book Title" />
 
             <TextView
-                android:id="@+id/tv_book_author"
+                android:id="@+id/tvAuthor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-                tools:text="Author Name"/>
+                android:textSize="14sp"
+                tools:text="Author Name" />
 
             <TextView
-                android:id="@+id/tv_book_category"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvPrice"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_category_chip"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                tools:text="Fiction"/>
+                android:layout_marginTop="4dp"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="$12.99" />
 
             <TextView
-                android:id="@+id/tv_book_price"
+                android:id="@+id/tvGenres"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                tools:text="Fiction, Classic" />
+
+            <TextView
+                android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                tools:text="$19.99"/>
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="12sp"
+                tools:text="Book description goes here..." />
 
         </LinearLayout>
 

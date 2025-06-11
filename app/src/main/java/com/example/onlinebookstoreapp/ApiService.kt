@@ -10,6 +10,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.QueryMap
 
 interface BookstoreApiService {
     @GET("v1/books")
@@ -22,6 +23,9 @@ interface BookstoreApiService {
         @Query("priceMin") priceMin: Double? = null,
         @Query("priceMax") priceMax: Double? = null
     ): BookResponse
+
+    @GET("v1/books")
+    suspend fun searchBooks(@QueryMap queryParams: Map<String, String>): BookResponse
 
     @GET("books/{id}")
     suspend fun getBookDetails(@Path("id") id: String): BookResponse

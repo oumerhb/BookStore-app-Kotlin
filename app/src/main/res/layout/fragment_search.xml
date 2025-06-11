@@ -33,6 +33,22 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Search Query Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search books..."
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_search_query"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Category Filter -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -79,19 +95,11 @@
                         android:layout_marginTop="16dp"
                         android:gravity="center_vertical">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_decrease_price"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:text="-"
-                            android:textSize="20sp"/>
-
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginHorizontal="8dp"
+                            android:layout_marginEnd="8dp"
                             android:hint="Min Price">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -107,13 +115,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="to"
-                            android:layout_marginHorizontal="4dp"/>
+                            android:layout_marginHorizontal="8dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginHorizontal="8dp"
+                            android:layout_marginStart="8dp"
                             android:hint="Max Price">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -125,31 +133,49 @@
 
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_increase_price"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:text="+"
-                            android:textSize="20sp"/>
-
                     </LinearLayout>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Search Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_search"
-                style="@style/Widget.MaterialComponents.Button"
+            <!-- Action Buttons -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Search"
-                app:icon="@drawable/search"
-                app:iconGravity="start"
-                app:iconPadding="8dp"/>
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_search"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Search"
+                    app:icon="@drawable/search"
+                    app:iconGravity="start"
+                    app:iconPadding="8dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_clear_filters"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Clear"/>
+
+            </LinearLayout>
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
 
             <!-- Results Section -->
             <androidx.recyclerview.widget.RecyclerView
