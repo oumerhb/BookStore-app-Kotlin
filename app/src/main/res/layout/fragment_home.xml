@@ -97,6 +97,7 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
+        <!-- New Arrivals Section -->
         <GridView
             android:id="@+id/categoriesGridView"
             android:layout_width="match_parent"
@@ -110,7 +111,6 @@
             android:verticalSpacing="8dp"
             tools:listitem="@layout/books_category" />
 
-        <!-- New Arrivals Section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -131,6 +131,11 @@
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="2"
             tools:listitem="@layout/new_arrivals" />
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

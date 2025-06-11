@@ -4,6 +4,7 @@ val DependencyHandlerScope.implementation: Unit
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -46,7 +47,8 @@ android {
 }
 
 dependencies {
-    val fragment_version = "1.8.7"
+    implementation(libs.androidx.room.runtime.android)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -55,15 +57,27 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.drawerlayout)
-    implementation(libs.androidx.material3.android)
+    implementation ("androidx.fragment:fragment-ktx:1.8.8")
+    implementation (libs.androidx.lifecycle.viewmodel.ktx.v261)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation("androidx.fragment:fragment-ktx:$fragment_version")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
-    implementation("com.google.android.material:material:1.11.0")
 
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7") // Check for latest version
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.moshi)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.moshi)
+    ksp(libs.moshi.codegen)  // Use kapt here
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    // Database
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
 }
