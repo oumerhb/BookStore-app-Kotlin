@@ -18,9 +18,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.onlinebookstoreapp.databinding.FragmentHomeBinding
 import com.example.onlinebookstoreapp.viewmodel.HomeViewModel
+import com.example.onlinebookstoreapp.Entities.BookEntity
+import com.example.onlinebookstoreapp.Entities.CategoryEntity
 import kotlinx.coroutines.launch
 import androidx.fragment.app.viewModels
-
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
@@ -67,17 +68,17 @@ class HomeFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.featuredBooks.collect { books ->
-                        featuredAdapter.updateBooks(books.map { it.toUiModel() })
+                        featuredAdapter.updateBooks(books)
                     }
                 }
                 launch {
                     viewModel.categories.collect { categories ->
-                        categoriesAdapter.updateCategories(categories.map { it.toUiModel() })
+                        categoriesAdapter.updateCategories(categories)
                     }
                 }
                 launch {
                     viewModel.newArrivals.collect { books ->
-                        newArrivalsAdapter.updateBooks(books.map { it.toUiModel() })
+                        newArrivalsAdapter.updateBooks(books)
                     }
                 }
                 launch {
@@ -95,7 +96,8 @@ class HomeFragment : Fragment() {
             }
         }
     }
-    class FeaturedBooksAdapter(private var books: List<BookUiModel>) :
+
+    class FeaturedBooksAdapter(private var books: List<BookEntity>) :
         RecyclerView.Adapter<FeaturedBooksAdapter.ViewHolder>() {
 
         class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -106,7 +108,7 @@ class HomeFragment : Fragment() {
             val price: TextView = itemView.findViewById(R.id.featuredBookPrice)
         }
 
-        fun updateBooks(newBooks: List<BookUiModel>) {
+        fun updateBooks(newBooks: List<BookEntity>) {
             books = newBooks
             notifyDataSetChanged()
         }
@@ -127,13 +129,14 @@ class HomeFragment : Fragment() {
             holder.price.text = "$${"%.2f".format(book.price)}"
 
             holder.itemView.setOnClickListener {
-                // Handle book click
+                // Handle book click - you can pass book.id to detail screen
             }
         }
 
         override fun getItemCount() = books.size
     }
-    class CategoriesAdapter(private var categories: List<CategoryUiModel>) : BaseAdapter() {
+
+    class CategoriesAdapter(private var categories: List<CategoryEntity>) : BaseAdapter() {
 
         override fun getCount() = categories.size
         override fun getItem(position: Int) = categories[position]
@@ -149,18 +152,19 @@ class HomeFragment : Fragment() {
             // Load image with Coil/Glide: view.findViewById<ImageView>(R.id.categoryIcon).load(category.imageUrl)
 
             view.setOnClickListener {
-                // Handle category click
+                // Handle category click - you can filter books by genre using category.name
             }
 
             return view
         }
 
-        fun updateCategories(newCategories: List<CategoryUiModel>) {
+        fun updateCategories(newCategories: List<CategoryEntity>) {
             categories = newCategories
             notifyDataSetChanged()
         }
     }
-    class NewArrivalsAdapter(private var books: List<BookUiModel>) :
+
+    class NewArrivalsAdapter(private var books: List<BookEntity>) :
         RecyclerView.Adapter<NewArrivalsAdapter.ViewHolder>() {
 
         class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -171,7 +175,7 @@ class HomeFragment : Fragment() {
             val price: TextView = itemView.findViewById(R.id.newArrivalPrice)
         }
 
-        fun updateBooks(newBooks: List<BookUiModel>) {
+        fun updateBooks(newBooks: List<BookEntity>) {
             books = newBooks
             notifyDataSetChanged()
         }
@@ -191,13 +195,14 @@ class HomeFragment : Fragment() {
             holder.price.text = "$${"%.2f".format(book.price)}"
 
             holder.itemView.setOnClickListener {
-                // Handle book click
+                // Handle book click - you can pass book.id to detail screen
             }
         }
 
         override fun getItemCount() = books.size
     }
 }
+
 class SpacingItemDecoration(private val spacing: Int) : RecyclerView.ItemDecoration() {
     override fun getItemOffsets(
         outRect: Rect,

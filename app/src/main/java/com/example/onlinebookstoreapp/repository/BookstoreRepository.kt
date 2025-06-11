@@ -1,6 +1,7 @@
 package com.example.onlinebookstoreapp.repository
 
 import com.example.onlinebookstoreapp.AppDatabase
+import com.example.onlinebookstoreapp.BookGenre
 import com.example.onlinebookstoreapp.BookstoreApiService
 import com.example.onlinebookstoreapp.Entities.BookEntity
 import com.example.onlinebookstoreapp.Entities.CartItemEntity
@@ -46,15 +47,30 @@ class BookstoreRepository(
         }
     }
 
-    suspend fun getCategories(): ApiResult<List<CategoryEntity>> {
-        return safeApiCall {
-            val response = apiService.getCategories()
-            val entities = response.map { it.toEntity() }
-            db.categoryDao().insertCategories(entities)
-            entities
+    suspend fun getBooks(
+        page: Int = 1,
+        limit: Int = 10,
+        sort: String? = null,
+        search: String? = null,
+        genres: List<String>? = null
+    ): ApiResult<List<BookEntity>> {
+        return try {
+            // Your API call logic here
+            val response = apiService.getBooks(page, limit, sort, search, genres)
+            ApiResult.Success(response.data.books.map { it.toEntity() })
+        } catch (e: Exception) {
+            ApiResult.Failure(e)
         }
     }
 
+    suspend fun getHardcodedCategories(): ApiResult<List<CategoryEntity>> {
+        return try {
+            val categories = BookGenre.getAllGenres()
+            ApiResult.Success(categories)
+        } catch (e: Exception) {
+            ApiResult.Failure(e)
+        }
+    }
     suspend fun getNewArrivals(): ApiResult<List<BookEntity>> {
         return safeApiCall {
             val response = apiService.getBooks()

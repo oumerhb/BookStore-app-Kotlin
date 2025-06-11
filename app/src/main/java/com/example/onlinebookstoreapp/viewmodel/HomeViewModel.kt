@@ -33,16 +33,46 @@ class HomeViewModel(
             _isLoading.value = true
             _error.value = null
 
-            // Load all data in parallel
-            val featuredDeferred = async { repository.getFeaturedBooks() }
-            val categoriesDeferred = async { repository.getCategories() }
-            val arrivalsDeferred = async { repository.getNewArrivals() }
+            try {
+                // Load all data in parallel using the actual API endpoints
+                val featuredDeferred = async {
+                    // Featured books: sort by price descending (assuming higher price = featured)
+                    repository.getBooks(
+                        page = 1,
+                        limit = 10,
+                        sort = "price:desc"
+                    )
+                }
 
-            featuredDeferred.await().collectResult(_featuredBooks)
-            categoriesDeferred.await().collectResult(_categories)
-            arrivalsDeferred.await().collectResult(_newArrivals)
+                val categoriesDeferred = async {
+                    // Categories: use hardcoded genres since API doesn't have categories endpoint
+                    repository.getHardcodedCategories()
+                }
 
-            _isLoading.value = false
+                val arrivalsDeferred = async {
+                    // New arrivals: sort by creation date descending
+                    repository.getBooks(
+                        page = 1,
+                        limit = 10,
+                        sort = "createdAt:desc"
+                    )
+                }
+
+                // Collect results
+                val featuredResult = featuredDeferred.await()
+                val categoriesResult = categoriesDeferred.await()
+                val arrivalsResult = arrivalsDeferred.await()
+
+                // Handle results
+                featuredResult.collectResult(_featuredBooks)
+                categoriesResult.collectResult(_categories)
+                arrivalsResult.collectResult(_newArrivals)
+
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Unknown error occurred"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
