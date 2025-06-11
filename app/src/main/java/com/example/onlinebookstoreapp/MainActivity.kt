@@ -12,7 +12,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        RetrofitClient.initialize(this)
         setContentView(R.layout.activity_main)
 
         if (savedInstanceState == null) {

@@ -12,7 +12,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface BookstoreApiService {
-    @GET("books")
+    @GET("v1/books")
     suspend fun getBooks(
         @Query("page") page: Int? = null,
         @Query("limit") limit: Int? = null,

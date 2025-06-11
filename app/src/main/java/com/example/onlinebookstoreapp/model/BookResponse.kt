@@ -24,7 +24,7 @@ data class PaginationInfo(
 
 // Individual book model matching API structure
 data class Book(
-    val _id: String,
+    val id: String,
     val title: String,
     val author: String,
     val price: Double,
@@ -40,7 +40,7 @@ data class Book(
 ) {
     fun toEntity(): BookEntity {
         return BookEntity(
-            id = _id,
+            id = id,
             title = title,
             author = author,
             price = price,

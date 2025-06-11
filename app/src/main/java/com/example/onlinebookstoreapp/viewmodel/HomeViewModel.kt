@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
-    private val repository: BookstoreRepository
-) : ViewModel() {
+class HomeViewModel : ViewModel() {
+    private val repository = BookstoreRepository.getInstance()
+
     private val _featuredBooks = MutableStateFlow<List<BookEntity>>(emptyList())
     val featuredBooks: StateFlow<List<BookEntity>> = _featuredBooks
 
@@ -34,9 +34,7 @@ class HomeViewModel(
             _error.value = null
 
             try {
-                // Load all data in parallel using the actual API endpoints
                 val featuredDeferred = async {
-                    // Featured books: sort by price descending (assuming higher price = featured)
                     repository.getBooks(
                         page = 1,
                         limit = 10,
@@ -45,12 +43,10 @@ class HomeViewModel(
                 }
 
                 val categoriesDeferred = async {
-                    // Categories: use hardcoded genres since API doesn't have categories endpoint
                     repository.getHardcodedCategories()
                 }
 
                 val arrivalsDeferred = async {
-                    // New arrivals: sort by creation date descending
                     repository.getBooks(
                         page = 1,
                         limit = 10,
@@ -58,12 +54,10 @@ class HomeViewModel(
                     )
                 }
 
-                // Collect results
                 val featuredResult = featuredDeferred.await()
                 val categoriesResult = categoriesDeferred.await()
                 val arrivalsResult = arrivalsDeferred.await()
 
-                // Handle results
                 featuredResult.collectResult(_featuredBooks)
                 categoriesResult.collectResult(_categories)
                 arrivalsResult.collectResult(_newArrivals)
