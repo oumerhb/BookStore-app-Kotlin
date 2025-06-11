@@ -17,15 +17,22 @@ class BookstoreRepository(
     private val bookDao = db.bookDao()
     private val cartDao = db.cartDao()
 
-    suspend fun syncBooks(): ApiResult<List<BookEntity>> {
-        return safeApiCall {
-            val remoteBooks = apiService.getBooks()
-            val bookEntities: List<BookEntity> = remoteBooks.map { it.toEntity() }
-            bookDao.insertBooks(bookEntities)
-            bookDao.getAllBooks() // Return the fresh list from DB
+    suspend fun getBooks(
+        page: Int = 1,
+        limit: Int = 10,
+        sort: String? = null,
+        search: String? = null,
+        genres: List<String>? = null
+    ): ApiResult<List<BookEntity>> {
+        return try {
+            val response = apiService.getBooks(page, limit, sort, search, genres)
+            // Access the books through response.data.books, not directly from response
+            val bookEntities = response.data.books.map { it.toEntity() }
+            ApiResult.Success(bookEntities)
+        } catch (e: Exception) {
+            ApiResult.Failure(e)
         }
     }
-
     suspend fun syncCart(): ApiResult<List<CartItemEntity>> {
         return safeApiCall {
             val remoteCart = apiService.getCartItems()
@@ -38,26 +45,17 @@ class BookstoreRepository(
             }
         }
     }
-    suspend fun getFeaturedBooks(): ApiResult<List<BookEntity>> {
-        return safeApiCall {
-            val response = apiService.getBooks()
-            val entities = response.map { it.toEntity() }
-            db.bookDao().insertBooks(entities)
-            entities
-        }
-    }
-
-    suspend fun getBooks(
-        page: Int = 1,
-        limit: Int = 10,
-        sort: String? = null,
-        search: String? = null,
-        genres: List<String>? = null
+    suspend fun getFeaturedBooks(page: Int = 1,
+                                 limit: Int = 10,
+                                 sort: String? = null,
+                                 search: String? = null,
+                                 genres: List<String>? = null
     ): ApiResult<List<BookEntity>> {
         return try {
-            // Your API call logic here
             val response = apiService.getBooks(page, limit, sort, search, genres)
-            ApiResult.Success(response.data.books.map { it.toEntity() })
+            // Access the books through response.data.books, not directly from response
+            val bookEntities = response.data.books.map { it.toEntity() }
+            ApiResult.Success(bookEntities)
         } catch (e: Exception) {
             ApiResult.Failure(e)
         }
@@ -71,12 +69,19 @@ class BookstoreRepository(
             ApiResult.Failure(e)
         }
     }
-    suspend fun getNewArrivals(): ApiResult<List<BookEntity>> {
-        return safeApiCall {
-            val response = apiService.getBooks()
-            val entities = response.map { it.toEntity() }
-            db.bookDao().insertBooks(entities)
-            entities
+    suspend fun getNewArrivals(page: Int = 1,
+                               limit: Int = 10,
+                               sort: String? = null,
+                               search: String? = null,
+                               genres: List<String>? = null
+    ): ApiResult<List<BookEntity>> {
+        return try {
+            val response = apiService.getBooks(page, limit, sort, search, genres)
+            // Access the books through response.data.books, not directly from response
+            val bookEntities = response.data.books.map { it.toEntity() }
+            ApiResult.Success(bookEntities)
+        } catch (e: Exception) {
+            ApiResult.Failure(e)
         }
     }
     // Add more repository methods as needed
