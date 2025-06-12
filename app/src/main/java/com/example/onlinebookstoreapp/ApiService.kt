@@ -4,6 +4,7 @@ import com.example.onlinebookstoreapp.model.AddToCartRequest
 import com.example.onlinebookstoreapp.model.BookDetailResponse
 import com.example.onlinebookstoreapp.model.BookResponse
 import com.example.onlinebookstoreapp.model.CartItem
+import com.example.onlinebookstoreapp.model.CartItemRequest
 import com.example.onlinebookstoreapp.model.CartItemResponse
 import com.example.onlinebookstoreapp.model.CategoryResponse
 import com.example.onlinebookstoreapp.model.LoginResponse

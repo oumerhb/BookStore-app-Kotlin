@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.example.onlinebookstoreapp.databinding.FragmentCartBinding
 import com.example.onlinebookstoreapp.model.AddToCartRequest
+import com.example.onlinebookstoreapp.model.CartItemRequest
 import kotlinx.coroutines.launch
 
 class CartFragment : Fragment() {
@@ -169,9 +170,8 @@ class CartFragment : Fragment() {
     private fun addItemBackToCart(cartItem: CartItemEntity) {
         lifecycleScope.launch {
             try {
-                val addRequest = AddToCartRequest(
-                    bookId = cartItem.bookId,
-                    quantity = cartItem.quantity
+                val addRequest = AddToCartRequest( // Wrap items in a list
+                    items = listOf(CartItemRequest(cartItem.bookId, cartItem.quantity))
                 )
 
                 apiService.addToCart(addRequest)
@@ -203,11 +203,11 @@ class CartFragment : Fragment() {
         val discount = 0.00 // No discount by default
         val total = subtotal + shipping + tax - discount
 
-        binding.subtotalPrice.text = "$${"%.2f".format(subtotal)}"
-        binding.shippingPrice.text = "$${"%.2f".format(shipping)}"
-        binding.taxPrice.text = "$${"%.2f".format(tax)}"
-        binding.discountPrice.text = "-$${"%.2f".format(discount)}"
-        binding.totalPrice.text = "$${"%.2f".format(total)}"
+        binding.subtotalPrice.text = "ETB ${"%.2f".format(subtotal)}"
+        binding.shippingPrice.text = "ETB ${"%.2f".format(shipping)}"
+        binding.taxPrice.text = "ETB ${"%.2f".format(tax)}"
+        binding.discountPrice.text = "-ETB ${"%.2f".format(discount)}"
+        binding.totalPrice.text = "ETB ${"%.2f".format(total)}"
     }
 
     private fun applyCoupon(couponCode: String) {

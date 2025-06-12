@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.onlinebookstoreapp.auth.AuthManager
 import com.example.onlinebookstoreapp.databinding.ActivityBookDetailBinding
+import com.example.onlinebookstoreapp.model.CartItemRequest
 import com.example.onlinebookstoreapp.model.AddToCartRequest
 import kotlinx.coroutines.launch
 
@@ -127,9 +128,8 @@ class BookDetailActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val addToCartRequest = AddToCartRequest(
-                    bookId = bookId,
-                    quantity = quantity
+                val addToCartRequest = AddToCartRequest( // Wrap items in a list
+                    items = listOf(CartItemRequest(bookId, quantity))
                 )
 
                 val response = apiService.addToCart(addToCartRequest)
