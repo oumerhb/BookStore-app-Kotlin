@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.onlinebookstoreapp.Entities.BookEntity
 import com.example.onlinebookstoreapp.databinding.ItemBookBinding
+import com.bumptech.glide.Glide
+
 
 
 class BookAdapter(
@@ -37,6 +39,11 @@ class BookAdapter(
                 tvPrice.text = "$${String.format("%.2f", book.price)}"
                 tvDescription.text = book.description
 
+                Glide.with(itemView.context)
+                    .load(book.imageUrl)
+                    .placeholder(R.drawable.book)
+                    .error(R.drawable.book)
+                    .into(ivBookCover)
 
                 /* Handle genres display
                 if (book.genres?.isNotEmpty() == true) {

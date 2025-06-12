@@ -1,5 +1,6 @@
 package com.example.onlinebookstoreapp
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +24,7 @@ import com.example.onlinebookstoreapp.Entities.BookEntity
 import com.example.onlinebookstoreapp.Entities.CategoryEntity
 import kotlinx.coroutines.launch
 import androidx.fragment.app.viewModels
+import com.bumptech.glide.Glide
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
@@ -31,39 +33,61 @@ class HomeFragment : Fragment() {
     private lateinit var featuredAdapter: FeaturedBooksAdapter
     private lateinit var categoriesAdapter: CategoriesAdapter
     private lateinit var newArrivalsAdapter: NewArrivalsAdapter
-
+    //private val btnExplore=binding.btnExplore
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val btnExplore=binding.btnExplore
+        btnExplore.setOnClickListener {
+            (activity as? MainActivity)?.navigateToSearchWithGenre("All Categories")
+        }
         setupAdapters()
         setupObservers()
         viewModel.loadData()
     }
 
     private fun setupAdapters() {
-        featuredAdapter = FeaturedBooksAdapter(emptyList())
+        featuredAdapter = FeaturedBooksAdapter(emptyList()) { bookId ->
+            // Navigate to book detail
+            val intent = Intent(requireContext(), BookDetailActivity::class.java)
+            intent.putExtra(BookDetailActivity.EXTRA_BOOK_ID, bookId)
+            startActivity(intent)
+        }
+
         binding.featuredRecyclerView.apply {
             adapter = featuredAdapter
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             addItemDecoration(SpacingItemDecoration(8))
         }
 
-        categoriesAdapter = CategoriesAdapter(emptyList())
+        categoriesAdapter = CategoriesAdapter(emptyList()) { categoryName ->
+            // Switch to search tab and pass prefiltered genre
+            val bundle = Bundle().apply {
+                putString("prefiltered_genre", categoryName)
+            }
+
+            // If using bottom navigation
+            (activity as? MainActivity)?.navigateToSearchWithGenre(categoryName)
+        }
         binding.categoriesGridView.adapter = categoriesAdapter
 
-        newArrivalsAdapter = NewArrivalsAdapter(emptyList())
+        newArrivalsAdapter = NewArrivalsAdapter(emptyList()) { bookId ->
+            // Navigate to book detail
+            val intent = Intent(requireContext(), BookDetailActivity::class.java)
+            intent.putExtra(BookDetailActivity.EXTRA_BOOK_ID, bookId)
+            startActivity(intent)
+        }
         binding.newArrivalsRecyclerView.adapter = newArrivalsAdapter
     }
-
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -99,7 +123,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-    class FeaturedBooksAdapter(private var books: List<BookEntity>) :
+    class FeaturedBooksAdapter( private var books: List<BookEntity>,
+                                private val onBookClick: (String) -> Unit ) :
         RecyclerView.Adapter<FeaturedBooksAdapter.ViewHolder>() {
 
         class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -123,22 +148,29 @@ class HomeFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val book = books[position]
-            // Use Coil or Glide for image loading
-            // holder.image.load(book.imageUrl)
+
+            Glide.with(holder.itemView.context)
+                .load(book.imageUrl)
+                .placeholder(R.drawable.book)
+                .error(R.drawable.book)
+                .centerCrop()
+                .into(holder.image)
             holder.title.text = book.title
             holder.author.text = book.author
             holder.rating.rating = book.rating
-            holder.price.text = "$${"%.2f".format(book.price)}"
+            holder.price.text = "ETB ${"%.2f".format(book.price)}"
+
 
             holder.itemView.setOnClickListener {
-                // Handle book click - you can pass book.id to detail screen
+                onBookClick(book.id)
             }
         }
 
         override fun getItemCount() = books.size
     }
 
-    class CategoriesAdapter(private var categories: List<CategoryEntity>) : BaseAdapter() {
+    class CategoriesAdapter( private var categories: List<CategoryEntity>,
+                             private val onCategoryClick: (String) -> Unit ) : BaseAdapter() {
 
         override fun getCount() = categories.size
         override fun getItem(position: Int) = categories[position]
@@ -154,7 +186,7 @@ class HomeFragment : Fragment() {
             // Load image with Coil/Glide: view.findViewById<ImageView>(R.id.categoryIcon).load(category.imageUrl)
 
             view.setOnClickListener {
-                // Handle category click - you can filter books by genre using category.name
+                onCategoryClick(category.name)
             }
 
             return view
@@ -166,7 +198,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-    class NewArrivalsAdapter(private var books: List<BookEntity>) :
+    class NewArrivalsAdapter( private var books: List<BookEntity>,
+                              private val onBookClick: (String) -> Unit) :
         RecyclerView.Adapter<NewArrivalsAdapter.ViewHolder>() {
 
         class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -190,15 +223,21 @@ class HomeFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val book = books[position]
-            // holder.image.load(book.imageUrl)
+
+            Glide.with(holder.itemView.context)
+                .load(book.imageUrl)
+                .placeholder(R.drawable.book)
+                .error(R.drawable.book)
+                .centerCrop()
+                .into(holder.image)
             holder.title.text = book.title
             holder.author.text = book.author
             holder.rating.rating = book.rating
-            holder.price.text = "$${"%.2f".format(book.price)}"
+            holder.price.text = "ETB ${"%.2f".format(book.price)}"
 
             holder.itemView.setOnClickListener {
-                // Handle book click - you can pass book.id to detail screen
-            }
+                onBookClick(book.id)
+                  }
         }
 
         override fun getItemCount() = books.size

@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.drawerlayout)
     implementation ("androidx.fragment:fragment-ktx:1.8.8")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    ksp("com.github.bumptech.glide:compiler:4.12.0")
     implementation (libs.androidx.lifecycle.viewmodel.ktx.v261)
 
     // Testing

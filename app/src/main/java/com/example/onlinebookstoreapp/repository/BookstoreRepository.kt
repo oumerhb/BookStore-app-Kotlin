@@ -47,17 +47,17 @@ class BookstoreRepository private constructor(
         }
     }
 
-    suspend fun syncCart(): ApiResult<List<CartItemEntity>> {
-        return safeApiCall {
-            val remoteCart = apiService.getCartItems()
-            val cartEntities: List<CartItemEntity> = remoteCart.map { it.toEntity() }
-            cartDao.insertCartItems(cartEntities)
-
-            cartDao.getCartItems().also {
-                if (it.isEmpty()) throw IllegalStateException("Cart sync failed - no items found")
-            }
-        }
-    }
+//    suspend fun syncCart(): ApiResult<List<CartItemEntity>> {
+//        return safeApiCall {
+//            val remoteCart = apiService.getCartItems()
+//            val cartEntities: List<CartItemEntity> = remoteCart.map { it.toEntity() }
+//            cartDao.insertCartItems(cartEntities)
+//
+//            cartDao.getCartItems().also {
+//                if (it.isEmpty()) throw IllegalStateException("Cart sync failed - no items found")
+//            }
+//        }
+//    }
 
     suspend fun getFeaturedBooks(
         page: Int = 1,

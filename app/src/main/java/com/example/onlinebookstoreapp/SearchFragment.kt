@@ -12,13 +12,28 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.example.onlinebookstoreapp.databinding.FragmentSearchBinding
 import kotlinx.coroutines.launch
 
-class SearchFragment(// Assuming you have ApiClient set up
-    private val apiService: BookstoreApiService
-) : Fragment() {
+class SearchFragment : Fragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var bookAdapter: BookAdapter
+
+    // Use the singleton RetrofitClient instead of creating a new instance
+    private val apiService: BookstoreApiService by lazy {
+        RetrofitClient.apiService
+    }
+
+    companion object {
+        private const val ARG_PREFILTERED_GENRE = "prefiltered_genre"
+
+        fun newInstance(prefilledGenre: String? = null): SearchFragment {
+            val fragment = SearchFragment()
+            val args = Bundle()
+            prefilledGenre?.let { args.putString(ARG_PREFILTERED_GENRE, it) }
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,18 +47,21 @@ class SearchFragment(// Assuming you have ApiClient set up
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set up the toolbar
         val toolbar: MaterialToolbar = binding.toolbar
         toolbar.title = "Search Books"
 
-        // Set up UI components
         setupUI()
         setupRecyclerView()
         setupSearchListeners()
+
+        // Handle prefiltered genre from arguments
+        arguments?.getString(ARG_PREFILTERED_GENRE)?.let { genre ->
+            binding.categorySpinner.setText(genre, false)
+            performSearch() // Automatically search with the prefiltered genre
+        }
     }
 
     private fun setupUI() {
-        // Set up category spinner with API genres
         val categories = arrayOf(
             "All Categories", "Fiction", "Non Fiction", "Science Fiction",
             "Mystery", "Thriller", "Romance", "History", "Biography",
@@ -61,7 +79,6 @@ class SearchFragment(// Assuming you have ApiClient set up
         )
         binding.categorySpinner.setText("All Categories", false)
 
-        // Set default price values
         binding.etMinPrice.setText("0.00")
         binding.etMaxPrice.setText("100.00")
     }
@@ -78,12 +95,10 @@ class SearchFragment(// Assuming you have ApiClient set up
     }
 
     private fun setupSearchListeners() {
-        // Search button click
         binding.btnSearch.setOnClickListener {
             performSearch()
         }
 
-        // Clear filters button
         binding.btnClearFilters?.setOnClickListener {
             clearFilters()
         }
@@ -95,7 +110,6 @@ class SearchFragment(// Assuming you have ApiClient set up
         val minPrice = binding.etMinPrice.text.toString().toDoubleOrNull()
         val maxPrice = binding.etMaxPrice.text.toString().toDoubleOrNull()
 
-        // Build query parameters based on API specification
         val queryParams = mutableMapOf<String, String>().apply {
             if (searchQuery.isNotEmpty()) {
                 put("search", searchQuery)
@@ -120,9 +134,10 @@ class SearchFragment(// Assuming you have ApiClient set up
         lifecycleScope.launch {
             try {
                 val response = apiService.searchBooks(queryParams)
+                val bookEntities = response.data.books.map { book -> book.toEntity() }
 
-                if (response.data.books.isNotEmpty()) {
-                    bookAdapter.submitList(response.data.books)
+                if (bookEntities.isNotEmpty()) {
+                    bookAdapter.submitList(bookEntities)
                     binding.recyclerView.visibility = View.VISIBLE
                     binding.tvNoResults.visibility = View.GONE
                 } else {
@@ -146,7 +161,6 @@ class SearchFragment(// Assuming you have ApiClient set up
         binding.etMinPrice.setText("0.00")
         binding.etMaxPrice.setText("100.00")
 
-        // Hide results
         binding.recyclerView.visibility = View.GONE
         binding.tvNoResults.visibility = View.VISIBLE
         binding.tvNoResults.text = "No search performed yet"

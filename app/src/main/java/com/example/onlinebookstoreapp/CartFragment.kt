@@ -5,15 +5,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.example.onlinebookstoreapp.databinding.FragmentCartBinding
+import com.example.onlinebookstoreapp.model.AddToCartRequest
+import kotlinx.coroutines.launch
 
 class CartFragment : Fragment() {
 
     private var _binding: FragmentCartBinding? = null
     private val binding get() = _binding!!
     private lateinit var cartAdapter: CartAdapter
+
+    private val apiService: BookstoreApiService by lazy {
+        RetrofitClient.apiService
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +37,7 @@ class CartFragment : Fragment() {
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
-        updateCartUI()
+        loadCartFromAPI()
     }
 
     private fun setupToolbar() {
@@ -41,7 +48,7 @@ class CartFragment : Fragment() {
 
     private fun setupRecyclerView() {
         cartAdapter = CartAdapter(
-            items = getSampleCartItems(),
+            items = mutableListOf(),
             onQuantityChanged = { position, newQuantity ->
                 updateItemQuantity(position, newQuantity)
             },
@@ -68,13 +75,111 @@ class CartFragment : Fragment() {
         }
 
         binding.checkoutButton.setOnClickListener {
-            Snackbar.make(binding.root, "Proceeding to checkout", Snackbar.LENGTH_SHORT).show()
-            // Navigate to checkout screen
+            proceedToCheckout()
         }
 
         binding.startShoppingButton.setOnClickListener {
-            Snackbar.make(binding.root, "Start shopping clicked", Snackbar.LENGTH_SHORT).show()
-            // Navigate to products screen
+            // Navigate back to home or search
+            (activity as? MainActivity)?.navigateToSearchWithGenre("All Categories")
+        }
+    }
+
+    private fun loadCartFromAPI() {
+        binding.progressBar?.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getCartItems()
+                val cartItems = response.data.cart.items.map { cartItem ->
+                    CartItemEntity(
+                        id = cartItem.book.id,
+                        bookId = cartItem.book.id,
+                        title = cartItem.book.title,
+                        author = cartItem.book.author,
+                        price = cartItem.book.price,
+                        quantity = cartItem.quantity,
+                        imageUrl = cartItem.book.coverImage ?: ""
+                    )
+                }
+
+                cartAdapter.updateItems(cartItems)
+                updateCartUI()
+
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "Error loading cart: ${e.message}", Snackbar.LENGTH_LONG).show()
+                updateCartUI() // Show empty state
+            } finally {
+                binding.progressBar?.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun updateItemQuantity(position: Int, newQuantity: Int) {
+        val cartItem = cartAdapter.items[position]
+
+        if (newQuantity > 0) {
+            lifecycleScope.launch {
+                try {
+                    val updateRequest = mapOf(
+                        "items" to listOf(
+                            mapOf(
+                                "bookId" to cartItem.bookId,
+                                "quantity" to newQuantity
+                            )
+                        )
+                    )
+
+                    apiService.updateCartQuantities(updateRequest)
+                    cartItem.quantity = newQuantity
+                    cartAdapter.notifyItemChanged(position)
+                    updateOrderSummary()
+
+                } catch (e: Exception) {
+                    Snackbar.make(binding.root, "Error updating quantity: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            removeItem(position)
+        }
+    }
+
+    private fun removeItem(position: Int) {
+        val cartItem = cartAdapter.items[position]
+
+        lifecycleScope.launch {
+            try {
+                apiService.removeBookFromCart(cartItem.bookId)
+                cartAdapter.items.removeAt(position)
+                cartAdapter.notifyItemRemoved(position)
+                updateCartUI()
+
+                Snackbar.make(binding.root, "Item removed from cart", Snackbar.LENGTH_LONG)
+                    .setAction("UNDO") {
+                        // Re-add item to cart
+                        addItemBackToCart(cartItem)
+                    }
+                    .show()
+
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "Error removing item: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun addItemBackToCart(cartItem: CartItemEntity) {
+        lifecycleScope.launch {
+            try {
+                val addRequest = AddToCartRequest(
+                    bookId = cartItem.bookId,
+                    quantity = cartItem.quantity
+                )
+
+                apiService.addToCart(addRequest)
+                loadCartFromAPI() // Reload cart to get updated data
+
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "Error adding item back: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -95,7 +200,7 @@ class CartFragment : Fragment() {
         val subtotal = cartAdapter.items.sumOf { it.price * it.quantity }
         val shipping = 5.99
         val tax = subtotal * 0.105 // 10.5% tax
-        val discount = 10.00 // Sample discount
+        val discount = 0.00 // No discount by default
         val total = subtotal + shipping + tax - discount
 
         binding.subtotalPrice.text = "$${"%.2f".format(subtotal)}"
@@ -105,62 +210,17 @@ class CartFragment : Fragment() {
         binding.totalPrice.text = "$${"%.2f".format(total)}"
     }
 
-    private fun updateItemQuantity(position: Int, newQuantity: Int) {
-        if (newQuantity > 0) {
-            cartAdapter.items[position].quantity = newQuantity
-            cartAdapter.notifyItemChanged(position)
-            updateOrderSummary()
-        } else {
-            removeItem(position)
-        }
-    }
-
-    private fun removeItem(position: Int) {
-        cartAdapter.items.removeAt(position)
-        cartAdapter.notifyItemRemoved(position)
-        updateCartUI()
-        Snackbar.make(binding.root, "Item removed from cart", Snackbar.LENGTH_LONG)
-            .setAction("UNDO") {
-                // Implement undo logic if needed
-            }
-            .show()
-    }
-
     private fun applyCoupon(couponCode: String) {
-        // In a real app, you would validate the coupon with your backend
-        Snackbar.make(binding.root, "Coupon applied: $couponCode", Snackbar.LENGTH_SHORT).show()
-        // Update discount and order summary
-        binding.discountPrice.text = "-$${"%.2f".format(15.00)}" // Increased discount
-        updateOrderSummary()
+        // For now, just show a message since coupon API isn't implemented
+        Snackbar.make(binding.root, "Coupon functionality not yet implemented", Snackbar.LENGTH_SHORT).show()
     }
 
-    private fun getSampleCartItems(): MutableList<CartItem> {
-        return mutableListOf(
-            CartItem(
-                id = "1",
-                name = "Premium Wireless Headphones",
-                variant = "Color: Black | Size: One Size",
-                price = 59.99,
-                quantity = 2,
-                imageUrl = ""
-            ),
-            CartItem(
-                id = "2",
-                name = "Organic Cotton T-Shirt",
-                variant = "Color: White | Size: M",
-                price = 24.99,
-                quantity = 1,
-                imageUrl = ""
-            ),
-            CartItem(
-                id = "3",
-                name = "Stainless Steel Water Bottle",
-                variant = "Color: Silver | Capacity: 750ml",
-                price = 19.99,
-                quantity = 3,
-                imageUrl = ""
-            )
-        )
+    private fun proceedToCheckout() {
+        if (cartAdapter.items.isNotEmpty()) {
+            // Navigate to checkout or create order
+            Snackbar.make(binding.root, "Proceeding to checkout...", Snackbar.LENGTH_SHORT).show()
+            // You can implement order creation here using the order API
+        }
     }
 
     override fun onDestroyView() {
@@ -168,10 +228,12 @@ class CartFragment : Fragment() {
         _binding = null
     }
 
-    data class CartItem(
+    // Updated data class to match API response
+    data class CartItemEntity(
         val id: String,
-        val name: String,
-        val variant: String,
+        val bookId: String,
+        val title: String,
+        val author: String,
         val price: Double,
         var quantity: Int,
         val imageUrl: String
